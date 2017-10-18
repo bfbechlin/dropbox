@@ -14,8 +14,8 @@ namespace comm_protocol {
 
 
 class Communication {
-private:
-	int socket_fd;
+protected:
+	int socketFD;
 public:
 	/* Constructor will be different to Server and Client */
 
