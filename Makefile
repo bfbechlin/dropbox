@@ -1,4 +1,4 @@
-CC=g++
+CC=g++ -std=c++11
 INCLUDE=
 FLAGS=-O2 -Wall
 
@@ -6,7 +6,7 @@ CFLAGS=$(FLAGS) $(INCLUDE)
 
 .PHONY: dropboxServer dropboxClient util all clean
 
-all: dropboxServer dropboxClient
+all: util dropboxServer dropboxClient
 
 dropboxServer: server/dropboxServer.o server/serverComm.o
 	$(CC) $(CFLAGS) -o $@ $^

@@ -1,4 +1,4 @@
-
+#include <string>
 
 class ServerComm
 {
@@ -7,5 +7,8 @@ private:
 	int socketFd;
 public:
 	ServerComm(int port);
-	int newConnection(void);
+	ServerComm(int port, int socketFd);
+	ServerComm newConnection(void);
+	bool send(std::string message);
+	std::string receive(void);
 };

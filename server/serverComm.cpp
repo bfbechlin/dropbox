@@ -1,5 +1,6 @@
 #include "serverComm.h"
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
 #include <sys/types.h>
@@ -7,6 +8,8 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
+#define BUFFER_LEN 50
+#define COMM_MESSAGE_BEGIN 	'\x2'
 
 ServerComm::ServerComm(int port)
 {
@@ -28,7 +31,12 @@ ServerComm::ServerComm(int port)
 	printf("Server online at: %s\n", inet_ntoa(serverAddr.sin_addr));
 }
 
-int ServerComm::newConnection(void)
+ServerComm::ServerComm(int port, int socketFd){
+	this->port = port;
+	this->socketFd = socketFd;
+}
+
+ServerComm ServerComm::newConnection(void)
 {
 	int clientSocket;
 	struct sockaddr_in clientAddr;
@@ -42,5 +50,5 @@ int ServerComm::newConnection(void)
 		printf("[servidor_tcp]~: erro ao aceitar a conexao com o cliente.");
 
 	printf("Accepted connection with %s\n", inet_ntoa(clientAddr.sin_addr));
-	return clientSocket;
+	return ServerComm(this->port, clientSocket);
 }

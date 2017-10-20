@@ -1,10 +1,15 @@
 #include <iostream>
 #include "serverComm.h"
 
-int main()
+#include <stdlib.h>
+
+int main(int argc, char* argv[])
 {
-	int client;
-	ServerComm server(5000);
-	client = server.newConnection();
+	ServerComm server(atoi(argv[1]));
+	ServerComm client = server.newConnection();
+	std::cout << client.receive() << "\n";
+	std::cout << client.receive() << "\n";
+	client.send("Hello from server");
+
 	return 0;
 }
