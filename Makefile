@@ -4,17 +4,15 @@ FLAGS=-O2 -Wall
 
 CFLAGS=$(FLAGS) $(INCLUDE)
 
-.PHONY: dropboxServer dropboxClient util all clean
+.PHONY: dropboxServer dropboxClient all clean
 
-all: util dropboxServer dropboxClient
+all: dropboxServer dropboxClient
 
-dropboxServer: server/dropboxServer.o server/serverComm.o
+dropboxServer: util/communication.o server/serverComm.o server/dropboxServer.o
 	$(CC) $(CFLAGS) -o $@ $^
 
-dropboxClient: client/dropboxClient.o client/clientComm.o
+dropboxClient: util/communication.o client/dropboxClient.o client/clientComm.o
 	$(CC) $(CFLAGS) -o $@ $^
-
-util: util/communication.o
 
 %.o: %.c
 	$(CC) $(CFLAGS) -c -o $@ $<

@@ -1,14 +1,15 @@
+#ifndef __SERVERCOMM_H__
+#define __SERVERCOMM_H__
+
+#include "../util/communication.h"
 #include <string>
 
-class ServerComm
+class ServerComm: public Communication
 {
-private:
-	int port;
-	int socketFd;
 public:
 	ServerComm(int port);
 	ServerComm(int port, int socketFd);
 	ServerComm newConnection(void);
-	bool send(std::string message);
-	std::string receive(void);
 };
+
+#endif
