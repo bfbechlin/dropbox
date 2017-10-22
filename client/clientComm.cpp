@@ -10,9 +10,6 @@
 
 #include <string>
 
-#define BUFFER_LEN 50
-#define COMM_MESSAGE_BEGIN 	'\x2'
-
 ClientComm::ClientComm(int clientPort)
 {
 	this->port = clientPort;
@@ -22,7 +19,7 @@ ClientComm::ClientComm(int clientPort)
 	  printf("[cliente_tcp]~: erro iniciando socket.\n");
 
 	clientAddr.sin_family = AF_INET;
-	clientAddr.sin_addr.s_addr = htonl(INADDR_ANY);
+	clientAddr.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
 	clientAddr.sin_port = htons(clientPort);
 
 	if ((bind(this->socketFd, (struct sockaddr *) &clientAddr, sizeof(clientAddr))) != 0)

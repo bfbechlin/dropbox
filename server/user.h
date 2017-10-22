@@ -1,5 +1,5 @@
-#ifndef __COMMUNICATION_H__
-#define __COMMUNICATION_H__
+#ifndef __USER_H__
+#define __USER_H__
 
 #include "../config/env.h"
 #include <string>

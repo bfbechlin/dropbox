@@ -8,9 +8,6 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
-#define BUFFER_LEN 50
-#define COMM_MESSAGE_BEGIN 	'\x2'
-
 ServerComm::ServerComm(int port)
 {
 	this->port = port;

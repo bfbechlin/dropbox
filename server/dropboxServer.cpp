@@ -10,6 +10,6 @@ int main(int argc, char* argv[])
 	std::cout << client.receive() << "\n";
 	std::cout << client.receive() << "\n";
 	client.send("Hello from server");
-
+	client.sendFile("server/test.txt");
 	return 0;
 }
