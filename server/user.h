@@ -1,32 +1,21 @@
 #ifndef __USER_H__
 #define __USER_H__
 
-#include "../config/env.h"
-#include <string>
+#include <iostream>
+#include <list>
 
-#define COMM_FILE_CHUNK_SIZE 8192 //bytes
-#define COMM_MESSAGE_BEGIN 	'\x2'
-#define COMM_FILE_BEGIN 	'\x3'
-
-/*
-namespace comm_protocol {
-	enum messages {
-		SEND_FILE //...
-	}
-}
-*/
-
-class Communication
+class User
 {
-protected:
-	int port;
-	int socketFd;
-public:
-	Communication();
-	bool send(std::string message);
-	std::string receive(void);
-	bool sendFile(std::string fileSourcePath);
-	bool receiveFile(std::string fileDestPath);
-};
+	private:
+		std::vector<ServerComm> devices;
+		std::string userId;
+		std::map<std::string, FileInfo> files;
+
+	public:
+		void pull(ServerComm device);
+		void push(ServerComm device);
+		void receiveFile(ServerComm device);
+		void sendFile(ServerComm device); 
+}
 
 #endif

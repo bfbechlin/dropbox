@@ -1,4 +1,4 @@
-CC=g++ -std=c++11
+CC=g++ -std=gnu++11
 INCLUDE=
 FLAGS=-O2 -Wall
 
@@ -14,8 +14,8 @@ dropboxServer: util/communication.o server/serverComm.o server/dropboxServer.o
 dropboxClient: util/communication.o client/dropboxClient.o client/clientComm.o
 	$(CC) $(CFLAGS) -o $@ $^
 
-%.o: %.c
-	$(CC) $(CFLAGS) -c -o $@ $<
+%.o: %.cpp
+	$(CC) $(CFLAGS) -c -o $@ $< 
 
 clean:
 	rm -f *~ *.bak *. ./*/*.o dropboxClient dropboxServer

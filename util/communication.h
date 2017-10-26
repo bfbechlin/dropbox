@@ -23,8 +23,9 @@ protected:
 	int socketFd;
 public:
 	Communication();
-	bool send(std::string message);
-	std::string receive(void);
+	~Communication();
+	bool sendMessage(std::string message);
+	std::string receiveMessage(void);
 	bool sendFile(std::string fileSourcePath);
 	bool receiveFile(std::string fileDestPath);
 };

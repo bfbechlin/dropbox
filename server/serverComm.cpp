@@ -14,16 +14,19 @@ ServerComm::ServerComm(int port)
 	struct sockaddr_in serverAddr;
 
 	if ((this->socketFd = socket(AF_INET, SOCK_STREAM, 0)) < 0)
-        printf("ERROR opening socket");
+	{
+		printf("ERROR opening socket");
+	}
 
 	serverAddr.sin_family = AF_INET;
 	serverAddr.sin_port = htons(port);
 	serverAddr.sin_addr.s_addr = INADDR_ANY;
 	bzero(&(serverAddr.sin_zero), 8);
 
-	if (bind(this->socketFd, (struct sockaddr *) &serverAddr,
-		sizeof(serverAddr)) < 0)
+	if (bind(this->socketFd, (struct sockaddr *) &serverAddr, sizeof(serverAddr)) < 0)
+	{
 		printf("ERROR on binding");
+	}
 
 	printf("Server online at: %s\n", inet_ntoa(serverAddr.sin_addr));
 }
