@@ -15,7 +15,8 @@ ServerComm::ServerComm(int port)
 
 	if ((this->socketFd = socket(AF_INET, SOCK_STREAM, 0)) < 0)
 	{
-		printf("ERROR opening socket");
+		fprintf(stderr, "[server]~: ERROR on opening socket.\n");
+		exit(1);
 	}
 
 	serverAddr.sin_family = AF_INET;
@@ -25,10 +26,9 @@ ServerComm::ServerComm(int port)
 
 	if (bind(this->socketFd, (struct sockaddr *) &serverAddr, sizeof(serverAddr)) < 0)
 	{
-		printf("ERROR on binding");
+		fprintf(stderr, "[server]~: ERROR on binding socket with port %i.\n", this->port);
+		exit(1);
 	}
-
-	printf("Server online at: %s\n", inet_ntoa(serverAddr.sin_addr));
 }
 
 ServerComm::ServerComm(int port, int socketFd){
@@ -43,12 +43,17 @@ ServerComm ServerComm::newConnection(void)
 	socklen_t clientAddrLen = sizeof(clientAddr);
 
 	if((listen(this->socketFd, 8)) != 0)
-		printf("[servidor_tcp]~: erro ao realizar listen.");
+	{
+		fprintf(stderr, "[server]~: ERROR on listing new connections.\n");
+		exit(1);
+	}
 
-	if((clientSocket = accept(this->socketFd, (struct sockaddr *) &clientAddr,
-		(socklen_t *) &clientAddrLen)) < 0)
-		printf("[servidor_tcp]~: erro ao aceitar a conexao com o cliente.");
+	if((clientSocket = accept(this->socketFd, (struct sockaddr *) &clientAddr, (socklen_t *) &clientAddrLen)) < 0)
+	{
+		fprintf(stderr, "[server]~: ERROR on accept connection from client.\n");
+		exit(1);
+	}
 
-	printf("Accepted connection with %s\n", inet_ntoa(clientAddr.sin_addr));
+	fprintf(stderr, "[server]~: SUCCESS accepted connection with %s\n", inet_ntoa(clientAddr.sin_addr));
 	return ServerComm(this->port, clientSocket);
 }

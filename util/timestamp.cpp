@@ -9,7 +9,7 @@ Timestamp::Timestamp(){
 	this->microseconds = 0;
 };
 
-Timestamp::Timestamp(timestamp_encode info)
+Timestamp::Timestamp(struct tsencode info)
 {
 	this->seconds = info.seconds;
 	this->microseconds = info.microseconds;
@@ -33,9 +33,9 @@ Timestamp::Timestamp(long int seconds, long int microseconds)
 	this->microseconds = microseconds;
 }
 
-timestamp_encode Timestamp::encode(void)
+struct tsencode Timestamp::encode(void)
 {
-	timestamp_encode info;
+	struct tsencode info;
 	info.seconds = this->seconds;
 	info.microseconds = this->microseconds;
 

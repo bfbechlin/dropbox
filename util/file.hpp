@@ -1,6 +1,9 @@
 #ifndef __FILE_HPP__
 #define __FILE_HPP__
 
+#include "timestamp.hpp"
+#include <string>
+
 class File
 {
 	private:
@@ -8,7 +11,14 @@ class File
 		Timestamp modification;
 		Timestamp access;
 	public:
-		File(std::path, std::name);
+		File();
+		File(std::string name);
+		File(std::string name, Timestamp access, Timestamp mod);
+
+		std::string getName(void);
+		Timestamp getModification(void);
+		Timestamp getAccess(void);
+
 		bool isValid(void);
 };
 

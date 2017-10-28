@@ -35,13 +35,14 @@ bool Communication::sendMessage(std::string message)
 {
 	char messageBeginSignal = COMM_MESSAGE_BEGIN;
 	uint32_t messageLenght = strlen(message.c_str());
-	/* Send message begin signal */
+	messageLenght = htonl(messageLenght);
+
 	if(write(this->socketFd, &messageBeginSignal, sizeof(messageBeginSignal)) < (int)sizeof(messageBeginSignal))
 		return false;
-	/* Send message lenght */
+
 	if(write(this->socketFd, &messageLenght, sizeof(messageLenght)) < (int)sizeof(messageLenght))
 		return false;
-	/* Send message payload */
+
 	if(write(this->socketFd, message.c_str(), strlen(message.c_str())) < (int)strlen(message.c_str()))
 		return false;
 
@@ -61,7 +62,7 @@ std::string Communication::receiveMessage(void)
 	if(read(this->socketFd, &messageLenght, sizeof(messageLenght)) < (int)sizeof(messageLenght))
 		return std::string("");
 
-	messageLenght = messageLenght;
+	messageLenght = ntohl(messageLenght);
 
 	char* buffer = (char*) calloc(1, messageLenght);
 
@@ -82,13 +83,15 @@ std::string Communication::receiveMessage(void)
 */
 bool Communication::sendFile(std::string fileSourcePath)
 {
+	Timestamp modification, access;
 	int fd;
 	char buffer[COMM_FILE_CHUNK_SIZE];
 	int readBytes, remainingBytes;
 	struct stat fileInfo;
 	uint32_t fileSize;
-	Timestamp modification, access;
-	timestamp_encode timestampBuffer;
+	struct tsencode timestampBuffer;
+	char fileBeginSignal = COMM_FILE_BEGIN;
+
 	if((fd = open(fileSourcePath.c_str(), O_RDONLY)) < 0)
 		return false;
 	if(fstat(fd, &fileInfo) < 0)
@@ -96,17 +99,16 @@ bool Communication::sendFile(std::string fileSourcePath)
 		close(fd);
 		return false;
 	}
-	char fileBeginSignal = COMM_FILE_BEGIN;
+
 	modification = Timestamp(fileInfo.st_mtim);
 	access = Timestamp(fileInfo.st_atim);
 	fileSize = fileInfo.st_size;
-	/* Send file begin signal */
+	fileSize = htonl(fileSize);
 	if(write(this->socketFd, &fileBeginSignal, sizeof(fileBeginSignal)) < (int)sizeof(fileBeginSignal))
 	{
 		close(fd);
 		return false;
 	}
-	/* Send file size */
 	if(write(this->socketFd, &fileSize, sizeof(fileSize)) < (int)sizeof(fileSize))
 	{
 		close(fd);
@@ -120,13 +122,11 @@ bool Communication::sendFile(std::string fileSourcePath)
 		return false;
 	}
 	timestampBuffer = modification.encode();
-	/* Send file size */
 	if(write(this->socketFd, &timestampBuffer, TIMESTAMP_LEN) < (int)TIMESTAMP_LEN)
 	{
 		close(fd);
 		return false;
 	}
-	/* Send file */
 	remainingBytes = fileInfo.st_size;
 	do
 	{
@@ -153,7 +153,7 @@ bool Communication::receiveFile(std::string fileDestPath)
 	char buffer[COMM_FILE_CHUNK_SIZE];
 	uint32_t fileSize;
 	Timestamp modification, access;
-	timestamp_encode timestampBuffer;
+	struct tsencode timestampBuffer;
 	struct timeval times[2];
 	int readBytes, remainingBytes, intendedBytes;
 	do
@@ -164,7 +164,7 @@ bool Communication::receiveFile(std::string fileDestPath)
 
 	if(read(this->socketFd, &fileSize, sizeof(fileSize)) < 0)
 		return false;
-
+	fileSize = ntohl(fileSize);
 	if(read(this->socketFd, &timestampBuffer, TIMESTAMP_LEN) < (int)TIMESTAMP_LEN)
 		return false;
 	access = Timestamp(timestampBuffer);
@@ -202,4 +202,69 @@ bool Communication::receiveFile(std::string fileDestPath)
 	times[TIMEVAL_MODIFICATION] = modification.toTimeval();
 	utimes(fileDestPath.c_str(), times);
 	return true;
+}
+
+bool Communication::push(std::vector<File*> files)
+{
+	Timestamp modification, access;
+	struct tsencode timestampBuffer;
+	char pushBeginSignal = COMM_PUSH_BEGIN;
+
+	if(write(this->socketFd, &pushBeginSignal, sizeof(pushBeginSignal)) < (int)sizeof(pushBeginSignal))
+		return false;
+
+	this->sendMessage(std::to_string(files.size()));
+
+	for (std::vector<File*>::iterator it = files.begin(); it != files.end(); ++it)
+	{
+		access = (*it)->getAccess();
+		modification = (*it)->getModification();
+		this->sendMessage((*it)->getName());
+		
+		timestampBuffer = access.encode();
+		if(write(this->socketFd, &timestampBuffer, TIMESTAMP_LEN) < (int)TIMESTAMP_LEN)
+			return false;
+
+		timestampBuffer = modification.encode();
+		if(write(this->socketFd, &timestampBuffer, TIMESTAMP_LEN) < (int)TIMESTAMP_LEN)
+			return false;
+
+	}
+
+	return true;
+}
+
+std::vector<File*> Communication::pull(void)
+{
+	std::vector<File*> files;
+	int lenght, i;
+	char messageSignal;
+	Timestamp modification, access;
+	struct tsencode timestampBuffer;
+	std::string fileName;
+
+	do
+	{
+		if(read(this->socketFd, &messageSignal, sizeof(messageSignal)) < 0)
+			return files;
+	} while(messageSignal != COMM_PUSH_BEGIN);
+
+	lenght = std::stoi(this->receiveMessage());
+
+	for(i = 0; i < lenght; i++)
+	{
+		fileName = this->receiveMessage();
+		if(read(this->socketFd, &timestampBuffer, TIMESTAMP_LEN) < (int)TIMESTAMP_LEN)
+			break;
+
+		access = Timestamp(timestampBuffer);
+
+		if(read(this->socketFd, &timestampBuffer, TIMESTAMP_LEN) < (int)TIMESTAMP_LEN)
+			break;
+
+		modification = Timestamp(timestampBuffer);
+
+		files.push_back(new File(fileName, access, modification));
+	}
+	return files;
 }

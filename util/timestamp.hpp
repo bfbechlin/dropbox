@@ -13,7 +13,7 @@
 #define TIMEVAL_MODIFICATION 1
 
 /* Used for transmission data */
-typedef struct _codTimesStamp{
+typedef struct tsencode{
 	uint64_t seconds;
 	uint64_t microseconds;
 }timestamp_encode;
@@ -27,12 +27,12 @@ class Timestamp
 
 	public:
 		Timestamp();
-		Timestamp(timestamp_encode info);
+		Timestamp(struct tsencode info);
 		Timestamp(struct timespec info);
 		Timestamp(struct timeval info);
 		Timestamp(long int seconds, long int microseconds);
 
-		timestamp_encode encode(void);
+		struct tsencode encode(void);
 		struct timeval toTimeval(void);
 
 		Timestamp operator + (const Timestamp& other);

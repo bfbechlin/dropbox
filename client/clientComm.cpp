@@ -16,16 +16,19 @@ ClientComm::ClientComm(int clientPort)
 	struct sockaddr_in clientAddr;
 
 	if ((this->socketFd = socket(AF_INET, SOCK_STREAM, 0)) < 0)
-	  printf("[cliente_tcp]~: erro iniciando socket.\n");
-
+	{
+		fprintf(stderr, "[client]~: ERROR on opening socket.\n");
+		exit(1);
+	}
 	clientAddr.sin_family = AF_INET;
 	clientAddr.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
 	clientAddr.sin_port = htons(clientPort);
 
 	if ((bind(this->socketFd, (struct sockaddr *) &clientAddr, sizeof(clientAddr))) != 0)
-		printf("[cliente_tcp]~: erro no bind.\n");
-
-	printf("Client online at: %s\n", inet_ntoa(clientAddr.sin_addr));
+	{
+		fprintf(stderr, "[client]~: ERROR on binding socket at port %i.\n", this->port);
+		exit(1);
+	}
 }
 
 bool ClientComm::connectServer(std::string serverIp, int serverPort)
@@ -37,8 +40,11 @@ bool ClientComm::connectServer(std::string serverIp, int serverPort)
 	serverAddr.sin_port = htons(serverPort);
 
 	if(connect(this->socketFd, (struct sockaddr*)&serverAddr, sizeof(serverAddr)) != 0)
-		printf("~[client_tcp]: erro na conexao com o servidor %s.\n", serverIp.c_str());
+	{
+		fprintf(stderr, "[client]~: ERROR on open connection with server.\n");
+		exit(1);
+	}
 
-	printf("Client connect with: %s\n", inet_ntoa(serverAddr.sin_addr));
+	fprintf(stderr, "[client]~: SUCCESS connect with %s\n",  inet_ntoa(serverAddr.sin_addr));
 	return true;
 }
