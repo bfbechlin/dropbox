@@ -11,7 +11,7 @@ all: dropboxServer dropboxClient
 dropboxServer: util/communication.o util/timestamp.o server/serverComm.o server/dropboxServer.o
 	$(CC) $(CFLAGS) -o $@ $^
 
-dropboxClient: util/communication.o client/dropboxClient.o client/clientComm.o
+dropboxClient: util/communication.o util/timestamp.o client/dropboxClient.o client/clientComm.o
 	$(CC) $(CFLAGS) -o $@ $^
 
 %.o: %.cpp

@@ -35,7 +35,6 @@ class FolderManager
 			DIFF_MODIFIED: files that are in both, but the modification Timestamp
 				is bigger in 'files'
 			DIFF_DELETED: files thar aren't in 'files' but are this folder.
-
 		*/
 		std::map<int, Files> diff(std::vector<Files> files);
 };

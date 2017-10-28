@@ -5,7 +5,6 @@ class File
 {
 	private:
 		std::string name;
-		std::string path;
 		Timestamp modification;
 		Timestamp access;
 	public:

@@ -1,4 +1,5 @@
 #include "communication.hpp"
+#include "timestamp.hpp"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -15,7 +16,9 @@
 #include <sys/time.h>
 
 #include <string>
+
 #include <errno.h>
+#include <iostream>
 
 Communication::Communication(void)
 {
@@ -33,13 +36,13 @@ bool Communication::sendMessage(std::string message)
 	char messageBeginSignal = COMM_MESSAGE_BEGIN;
 	uint32_t messageLenght = strlen(message.c_str());
 	/* Send message begin signal */
-	if(write(this->socketFd, &messageBeginSignal, sizeof(messageBeginSignal)) < sizeof(messageBeginSignal))
+	if(write(this->socketFd, &messageBeginSignal, sizeof(messageBeginSignal)) < (int)sizeof(messageBeginSignal))
 		return false;
 	/* Send message lenght */
-	if(write(this->socketFd, &messageLenght, sizeof(messageLenght)) < sizeof(messageLenght))
+	if(write(this->socketFd, &messageLenght, sizeof(messageLenght)) < (int)sizeof(messageLenght))
 		return false;
 	/* Send message payload */
-	if(write(this->socketFd, message.c_str(), strlen(message.c_str())) < strlen(message.c_str()))
+	if(write(this->socketFd, message.c_str(), strlen(message.c_str())) < (int)strlen(message.c_str()))
 		return false;
 
 	return true;
@@ -52,10 +55,10 @@ std::string Communication::receiveMessage(void)
 	uint32_t messageLenght;
 	do
 	{
-		if(read(this->socketFd, &messageSignal, sizeof(messageSignal)) < sizeof(messageSignal))
+		if(read(this->socketFd, &messageSignal, sizeof(messageSignal)) < (int)sizeof(messageSignal))
 			return std::string("");
 	} while(messageSignal != COMM_MESSAGE_BEGIN);
-	if(read(this->socketFd, &messageLenght, sizeof(messageLenght)) < sizeof(messageLenght))
+	if(read(this->socketFd, &messageLenght, sizeof(messageLenght)) < (int)sizeof(messageLenght))
 		return std::string("");
 
 	messageLenght = messageLenght;
@@ -81,11 +84,11 @@ bool Communication::sendFile(std::string fileSourcePath)
 {
 	int fd;
 	char buffer[COMM_FILE_CHUNK_SIZE];
-	int readBytes, sendBytes, remainingBytes;
+	int readBytes, remainingBytes;
 	struct stat fileInfo;
 	uint32_t fileSize;
-	uint64_t modTimeSec, accessTimeSec;
-	uint64_t modTimeUSec, accessTimeUSec;
+	Timestamp modification, access;
+	timestamp_encode timestampBuffer;
 	if((fd = open(fileSourcePath.c_str(), O_RDONLY)) < 0)
 		return false;
 	if(fstat(fd, &fileInfo) < 0)
@@ -94,43 +97,31 @@ bool Communication::sendFile(std::string fileSourcePath)
 		return false;
 	}
 	char fileBeginSignal = COMM_FILE_BEGIN;
+	modification = Timestamp(fileInfo.st_mtim);
+	access = Timestamp(fileInfo.st_atim);
 	fileSize = fileInfo.st_size;
-	accessTimeSec = fileInfo.st_atim.tv_sec;
-	modTimeSec = fileInfo.st_mtim.tv_sec;
-	accessTimeUSec = fileInfo.st_atim.tv_nsec/1000;
-	modTimeUSec = fileInfo.st_mtim.tv_nsec/1000;
 	/* Send file begin signal */
-	if(write(this->socketFd, &fileBeginSignal, sizeof(fileBeginSignal)) < sizeof(fileBeginSignal))
+	if(write(this->socketFd, &fileBeginSignal, sizeof(fileBeginSignal)) < (int)sizeof(fileBeginSignal))
 	{
 		close(fd);
 		return false;
 	}
 	/* Send file size */
-	if(write(this->socketFd, &fileSize, sizeof(fileSize)) < sizeof(fileSize))
+	if(write(this->socketFd, &fileSize, sizeof(fileSize)) < (int)sizeof(fileSize))
 	{
 		close(fd);
 		return false;
 	}
+	timestampBuffer = access.encode();
 	/* Send file size */
-	if(write(this->socketFd, &accessTimeSec, sizeof(accessTimeSec)) < sizeof(accessTimeSec))
+	if(write(this->socketFd, &timestampBuffer, TIMESTAMP_LEN) < (int)TIMESTAMP_LEN)
 	{
 		close(fd);
 		return false;
 	}
+	timestampBuffer = modification.encode();
 	/* Send file size */
-	if(write(this->socketFd, &accessTimeUSec, sizeof(accessTimeUSec)) < sizeof(accessTimeUSec))
-	{
-		close(fd);
-		return false;
-	}
-	/* Send file size */
-	if(write(this->socketFd, &modTimeSec, sizeof(modTimeSec)) < sizeof(modTimeSec))
-	{
-		close(fd);
-		return false;
-	}
-	/* Send file size */
-	if(write(this->socketFd, &modTimeUSec, sizeof(modTimeUSec)) < sizeof(modTimeUSec))
+	if(write(this->socketFd, &timestampBuffer, TIMESTAMP_LEN) < (int)TIMESTAMP_LEN)
 	{
 		close(fd);
 		return false;
@@ -161,8 +152,8 @@ bool Communication::receiveFile(std::string fileDestPath)
 	char messageSignal;
 	char buffer[COMM_FILE_CHUNK_SIZE];
 	uint32_t fileSize;
-	uint64_t modTimeSec, accessTimeSec;
-	uint64_t modTimeUSec, accessTimeUSec;
+	Timestamp modification, access;
+	timestamp_encode timestampBuffer;
 	struct timeval times[2];
 	int readBytes, remainingBytes, intendedBytes;
 	do
@@ -174,18 +165,13 @@ bool Communication::receiveFile(std::string fileDestPath)
 	if(read(this->socketFd, &fileSize, sizeof(fileSize)) < 0)
 		return false;
 
-	if(read(this->socketFd, &accessTimeSec, sizeof(accessTimeSec)) < sizeof(accessTimeSec))
+	if(read(this->socketFd, &timestampBuffer, TIMESTAMP_LEN) < (int)TIMESTAMP_LEN)
 		return false;
+	access = Timestamp(timestampBuffer);
 
-	if(read(this->socketFd, &accessTimeUSec, sizeof(accessTimeUSec)) < sizeof(accessTimeUSec))
+	if(read(this->socketFd, &timestampBuffer, TIMESTAMP_LEN) < (int)TIMESTAMP_LEN)
 		return false;
-
-	if(read(this->socketFd, &modTimeSec, sizeof(modTimeSec)) < sizeof(modTimeSec))
-		return false;
-
-	if(read(this->socketFd, &modTimeUSec, sizeof(modTimeUSec)) < sizeof(modTimeUSec))
-		return false;
-
+	modification = Timestamp(timestampBuffer);
 
 	unlink(fileDestPath.c_str());
 	if((fd = open(fileDestPath.c_str(), O_WRONLY | O_CREAT, 0666)) < 0)
@@ -212,10 +198,8 @@ bool Communication::receiveFile(std::string fileDestPath)
 	} while(remainingBytes > 0);
 	close(fd);
 
-	times[0].tv_sec = accessTimeSec;
-	times[0].tv_usec = accessTimeUSec;
-	times[1].tv_sec = modTimeSec;
-	times[1].tv_usec = modTimeUSec;
+	times[TIMEVAL_ACCESS] = access.toTimeval();
+	times[TIMEVAL_MODIFICATION] = modification.toTimeval();
 	utimes(fileDestPath.c_str(), times);
 	return true;
 }
