@@ -1,4 +1,4 @@
-#include "serverComm.h"
+#include "serverComm.hpp"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

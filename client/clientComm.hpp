@@ -1,7 +1,7 @@
-#ifndef __CLIENTCOMM_H__
-#define __CLIENTCOMM_H__
+#ifndef __CLIENTCOMM_HPP__
+#define __CLIENTCOMM_HPP__
 
-#include "../util/communication.h"
+#include "../util/communication.hpp"
 #include <string>
 
 class ClientComm : public Communication

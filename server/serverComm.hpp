@@ -1,7 +1,7 @@
-#ifndef __SERVERCOMM_H__
-#define __SERVERCOMM_H__
+#ifndef __SERVERCOMM_HPP__
+#define __SERVERCOMM_HPP__
 
-#include "../util/communication.h"
+#include "../util/communication.hpp"
 #include <string>
 
 class ServerComm: public Communication

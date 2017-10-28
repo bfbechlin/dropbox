@@ -1,5 +1,5 @@
 #include <iostream>
-#include "clientComm.h"
+#include "clientComm.hpp"
 
 #include <stdlib.h>
 

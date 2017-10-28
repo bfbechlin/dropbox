@@ -1,6 +1,6 @@
 #include <thread>
 #include <iostream>
-#include "serverComm.h"
+#include "serverComm.hpp"
 
 #include <stdlib.h>
 
