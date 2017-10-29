@@ -45,7 +45,6 @@ class Timestamp
 
 		std::string toString(void) const;
 		std::string toDate(void) const;
-
 };
 
 #endif

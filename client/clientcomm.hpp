@@ -7,6 +7,7 @@
 class ClientComm : public Communication
 {
 public:
+	ClientComm(void);
 	ClientComm(int port);
 	bool connectServer(std::string serverIp, int serverPort);
 };

@@ -1,6 +1,11 @@
 #ifndef __FOLDERMANAGER_HPP__
 #define __FOLDERMANAGER_HPP__
 
+#include <map>
+#include <string>
+#include <vector>
+#include "file.hpp"
+
 typedef enum{
 	DIFF_CREATED,
 	DIFF_MODIFIED,
@@ -27,7 +32,7 @@ class FolderManager
 				* it's not a temporary file -> ended in ~
 				* it's not a folder descriptor- > entry like . and ..
 		*/
-		std::vector<Files> getFiles(void);
+		std::vector<File*> getFiles(void);
 		/*
 			Classificate received files in 3 groups comparing with this folder
 			files. Like a git diff.
@@ -36,7 +41,7 @@ class FolderManager
 				is bigger in 'files'
 			DIFF_DELETED: files thar aren't in 'files' but are this folder.
 		*/
-		std::map<int, Files> diff(std::vector<Files> files);
+		std::map<int, File*> diff(std::vector<File*> files);
 };
 
 #endif

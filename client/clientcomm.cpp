@@ -1,4 +1,4 @@
-#include "clientComm.hpp"
+#include "clientcomm.hpp"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -9,6 +9,28 @@
 #include <arpa/inet.h>
 
 #include <string>
+
+ClientComm::ClientComm(void)
+{
+	this->port = 0;
+	struct sockaddr_in clientAddr;
+
+	if ((this->socketFd = socket(AF_INET, SOCK_STREAM, 0)) < 0)
+	{
+		fprintf(stderr, "[client]~: ERROR on opening socket.\n");
+		exit(1);
+	}
+	clientAddr.sin_family = AF_INET;
+	clientAddr.sin_addr.s_addr = htonl(INADDR_ANY);
+	clientAddr.sin_port = this->port;
+
+	if ((bind(this->socketFd, (struct sockaddr *) &clientAddr, sizeof(clientAddr))) != 0)
+	{
+		fprintf(stderr, "[client]~: ERROR on binding socket at port %i.\n", this->port);
+		exit(1);
+	}
+}
+
 
 ClientComm::ClientComm(int clientPort)
 {
@@ -21,7 +43,7 @@ ClientComm::ClientComm(int clientPort)
 		exit(1);
 	}
 	clientAddr.sin_family = AF_INET;
-	clientAddr.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
+	clientAddr.sin_addr.s_addr = htonl(INADDR_ANY);
 	clientAddr.sin_port = htons(clientPort);
 
 	if ((bind(this->socketFd, (struct sockaddr *) &clientAddr, sizeof(clientAddr))) != 0)

@@ -1,18 +1,18 @@
 CC=g++ -std=gnu++11
-INCLUDE=
+INCLUDE=-I./util
 FLAGS=-O2 -Wall
 CFLAGS=$(FLAGS) $(INCLUDE)
 
-UTIL=util/timestamp.o util/file.o util/communication.o
+UTIL=util/timestamp.o util/file.o util/foldermanager.o util/communication.o
 
 .PHONY: all clean
 
 all: dropboxServer dropboxClient
 
-dropboxServer: $(UTIL) server/serverComm.o server/dropboxServer.o
+dropboxServer: $(UTIL) server/database.o server/servercomm.o server/dropboxserver.o
 	$(CC) $(CFLAGS) -o $@ $^
 
-dropboxClient: $(UTIL) client/dropboxClient.o client/clientComm.o
+dropboxClient: $(UTIL) client/dropboxclient.o client/clientcomm.o
 	$(CC) $(CFLAGS) -o $@ $^
 
 %.o: %.cpp

@@ -7,6 +7,7 @@
 class ServerComm: public Communication
 {
 public:
+	ServerComm(void);
 	ServerComm(int port);
 	ServerComm(int port, int socketFd);
 	ServerComm newConnection(void);

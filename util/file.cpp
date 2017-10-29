@@ -35,6 +35,12 @@ Timestamp File::getModification(void)
 	return this->modification;
 }
 
+std::string File::toString() const{
+	return std::string("  File: " + this->name +
+		"\nAccess: " + this->access.toDate() +
+		"\nModify: " + this->modification.toDate());
+}
+
 bool File::isValid(void)
 {
 	// IMPLEMENT

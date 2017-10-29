@@ -15,8 +15,6 @@
 #include <sys/stat.h>
 #include <sys/time.h>
 
-#include <string>
-
 #include <errno.h>
 #include <iostream>
 
@@ -26,9 +24,20 @@ Communication::Communication(void)
 	this->socketFd = -1;
 }
 
+Communication::Communication(int socketFd)
+{
+	this->port = -1;
+	this->socketFd = socketFd;
+}
+
 Communication::~Communication(void)
 {
 	close(this->socketFd);
+}
+
+int Communication::getSocket(void)
+{
+	return this->socketFd;
 }
 
 bool Communication::sendMessage(std::string message)
@@ -115,7 +124,6 @@ bool Communication::sendFile(std::string fileSourcePath)
 		return false;
 	}
 	timestampBuffer = access.encode();
-	/* Send file size */
 	if(write(this->socketFd, &timestampBuffer, TIMESTAMP_LEN) < (int)TIMESTAMP_LEN)
 	{
 		close(fd);
@@ -220,7 +228,7 @@ bool Communication::push(std::vector<File*> files)
 		access = (*it)->getAccess();
 		modification = (*it)->getModification();
 		this->sendMessage((*it)->getName());
-		
+
 		timestampBuffer = access.encode();
 		if(write(this->socketFd, &timestampBuffer, TIMESTAMP_LEN) < (int)TIMESTAMP_LEN)
 			return false;

@@ -11,7 +11,7 @@ class File
 		Timestamp modification;
 		Timestamp access;
 	public:
-		File();
+		File(void);
 		File(std::string name);
 		File(std::string name, Timestamp access, Timestamp mod);
 
@@ -19,6 +19,7 @@ class File
 		Timestamp getModification(void);
 		Timestamp getAccess(void);
 
+		std::string toString(void) const;
 		bool isValid(void);
 };
 

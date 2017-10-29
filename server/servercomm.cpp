@@ -1,4 +1,4 @@
-#include "serverComm.hpp"
+#include "servercomm.hpp"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -7,6 +7,29 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+
+ServerComm::ServerComm(void)
+{
+	this->port = 0;
+	struct sockaddr_in serverAddr;
+
+	if ((this->socketFd = socket(AF_INET, SOCK_STREAM, 0)) < 0)
+	{
+		fprintf(stderr, "[server]~: ERROR on opening socket.\n");
+		exit(1);
+	}
+
+	serverAddr.sin_family = AF_INET;
+	serverAddr.sin_port = htons(port);
+	serverAddr.sin_addr.s_addr = INADDR_ANY;
+	bzero(&(serverAddr.sin_zero), 8);
+
+	if (bind(this->socketFd, (struct sockaddr *) &serverAddr, sizeof(serverAddr)) < 0)
+	{
+		fprintf(stderr, "[server]~: ERROR on binding socket with port %i.\n", this->port);
+		exit(1);
+	}
+}
 
 ServerComm::ServerComm(int port)
 {
@@ -54,6 +77,6 @@ ServerComm ServerComm::newConnection(void)
 		exit(1);
 	}
 
-	fprintf(stderr, "[server]~: SUCCESS accepted connection with %s\n", inet_ntoa(clientAddr.sin_addr));
+	fprintf(stderr, "[server]~: SUCCESS accepted connection with %s:%i\n", inet_ntoa(clientAddr.sin_addr), ntohs(clientAddr.sin_port));
 	return ServerComm(this->port, clientSocket);
 }

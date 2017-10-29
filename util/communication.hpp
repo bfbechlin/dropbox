@@ -25,8 +25,10 @@ protected:
 	int socketFd;
 public:
 	Communication();
+	Communication(int socketFd);
 	~Communication();
 
+	int getSocket(void);
 	bool sendMessage(std::string message);
 	std::string receiveMessage(void);
 
