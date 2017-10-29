@@ -1,22 +1,21 @@
 #ifndef __FOLDERMANAGER_HPP__
 #define __FOLDERMANAGER_HPP__
 
-#include <map>
 #include <string>
 #include <vector>
+#include <sys/types.h>
+#include <dirent.h>
 #include "file.hpp"
-
-typedef enum{
-	DIFF_CREATED,
-	DIFF_MODIFIED,
-	DIFF_DELETED
-}DIFF_ACTIONS;
+#include "filediff.hpp"
 
 class FolderManager
 {
 	private:
 		std::string path;
+		File makeFile(std::string path, std::string name);
+
 	public:
+		FolderManager(void){};
 		/*
 			Initialize inotify
 		*/
@@ -32,7 +31,13 @@ class FolderManager
 				* it's not a temporary file -> ended in ~
 				* it's not a folder descriptor- > entry like . and ..
 		*/
-		std::vector<File*> getFiles(void);
+		std::vector<File> getFiles(void);
+
+		/*
+			Get all files in this folder, even not valid
+		*/
+		std::vector<File> getAllFiles(void);
+
 		/*
 			Classificate received files in 3 groups comparing with this folder
 			files. Like a git diff.
@@ -41,7 +46,7 @@ class FolderManager
 				is bigger in 'files'
 			DIFF_DELETED: files thar aren't in 'files' but are this folder.
 		*/
-		std::map<int, File*> diff(std::vector<File*> files);
+		FileDiff diff(std::vector<File> files);
 };
 
 #endif

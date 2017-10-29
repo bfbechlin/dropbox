@@ -1,7 +1,6 @@
 #include <iostream>
 #include "clientcomm.hpp"
 #include "file.hpp"
-#include <stdlib.h>
 
 int main(int argc, char* argv[])
 {
@@ -14,7 +13,6 @@ int main(int argc, char* argv[])
 	files.push_back(File("test.txt"));
 	files.push_back(File("test2.txt"));
 	client.push(files);
-
 
 	return 0;
 }

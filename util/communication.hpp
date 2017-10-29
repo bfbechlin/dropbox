@@ -35,8 +35,8 @@ public:
 	bool sendFile(std::string fileSourcePath);
 	bool receiveFile(std::string fileDestPath);
 
-	bool push(std::vector<File*> files);
-	std::vector<File*> pull(void);
+	bool push(std::vector<File> files);
+	std::vector<File> pull(void);
 };
 
 #endif

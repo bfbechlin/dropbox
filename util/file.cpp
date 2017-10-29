@@ -1,4 +1,5 @@
 #include "file.hpp"
+#include <sys/stat.h>
 
 File::File(){
 	this->name = std::string("");
@@ -35,14 +36,33 @@ Timestamp File::getModification(void)
 	return this->modification;
 }
 
-std::string File::toString() const{
+std::string File::toString() const
+{
 	return std::string("  File: " + this->name +
 		"\nAccess: " + this->access.toDate() +
 		"\nModify: " + this->modification.toDate());
 }
 
-bool File::isValid(void)
+
+
+bool File::isTemp(std::string path)
 {
-	// IMPLEMENT
-	return true;
+    return (path.back() == '~');
+}
+
+bool File::isDir(std::string path)
+{
+    struct stat buffer;
+    return (stat(path.c_str(), &buffer) == 0 && !S_ISDIR(buffer.st_mode));
+}
+
+bool File::isValid(std::string path)
+{
+    return !(isDir(path) || isTemp(path));
+}
+
+bool File::exists(std::string path)
+{
+	struct stat buffer;
+    return (stat(path.c_str(), &buffer) == 0);
 }

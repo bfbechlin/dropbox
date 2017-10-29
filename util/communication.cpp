@@ -212,7 +212,7 @@ bool Communication::receiveFile(std::string fileDestPath)
 	return true;
 }
 
-bool Communication::push(std::vector<File*> files)
+bool Communication::push(std::vector<File> files)
 {
 	Timestamp modification, access;
 	struct tsencode timestampBuffer;
@@ -223,11 +223,11 @@ bool Communication::push(std::vector<File*> files)
 
 	this->sendMessage(std::to_string(files.size()));
 
-	for (std::vector<File*>::iterator it = files.begin(); it != files.end(); ++it)
+	for (std::vector<File>::iterator it = files.begin(); it != files.end(); ++it)
 	{
-		access = (*it)->getAccess();
-		modification = (*it)->getModification();
-		this->sendMessage((*it)->getName());
+		access = (*it).getAccess();
+		modification = (*it).getModification();
+		this->sendMessage((*it).getName());
 
 		timestampBuffer = access.encode();
 		if(write(this->socketFd, &timestampBuffer, TIMESTAMP_LEN) < (int)TIMESTAMP_LEN)
@@ -242,9 +242,9 @@ bool Communication::push(std::vector<File*> files)
 	return true;
 }
 
-std::vector<File*> Communication::pull(void)
+std::vector<File> Communication::pull(void)
 {
-	std::vector<File*> files;
+	std::vector<File> files;
 	int lenght, i;
 	char messageSignal;
 	Timestamp modification, access;
@@ -272,7 +272,7 @@ std::vector<File*> Communication::pull(void)
 
 		modification = Timestamp(timestampBuffer);
 
-		files.push_back(new File(fileName, access, modification));
+		files.push_back(File(fileName, access, modification));
 	}
 	return files;
 }

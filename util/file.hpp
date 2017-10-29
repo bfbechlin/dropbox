@@ -20,7 +20,12 @@ class File
 		Timestamp getAccess(void);
 
 		std::string toString(void) const;
-		bool isValid(void);
+
+
+		static bool isTemp(std::string path);
+		static bool isDir(std::string path);
+		static bool isValid(std::string path);
+		static bool exists(std::string path);
 };
 
 #endif
