@@ -9,7 +9,7 @@ FolderManager::FolderManager(std::string path)
 {
 	this->path = path;
 
-	if (File::isDir(this->path));
+	if (File::exists(this->path) && !File::isDir(this->path))
 	{
 		fprintf(stderr, "[FolderManager]~: ERROR entry %s already exists and not is a diretory.\n",
 			path.c_str());

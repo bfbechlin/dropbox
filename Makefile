@@ -4,7 +4,8 @@ FLAGS=-O2 -Wall
 CFLAGS=$(FLAGS) $(INCLUDE)
 
 UTIL=util/timestamp.o util/file.o util/foldermanager.o util/filediff.o\
- util/communication.o util/activeprocess.o util/passiveprocess.o
+ util/communication.o util/activeprocess.o util/passiveprocess.o util/device.o\
+ util/action.o
 
 .PHONY: all clean
 

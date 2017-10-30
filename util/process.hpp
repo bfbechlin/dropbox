@@ -9,16 +9,16 @@
 class Process
 {
 	protected:
-		Communication channel;
 		FolderManager* folder;
 	public:
+		Communication* channel;
 		Process(void)
 		{
-			this-> channel = Communication();
+			this-> channel = NULL;
 			this->folder = NULL;
 		};
 
-		Process(Communication channel, FolderManager *folder)
+		Process(Communication* channel, FolderManager *folder)
 		{
 			this->channel = channel;
 			this->folder = folder;

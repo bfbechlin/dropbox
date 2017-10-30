@@ -53,7 +53,8 @@ bool File::isTemp(std::string path)
 bool File::isDir(std::string path)
 {
     struct stat buffer;
-    return (stat(path.c_str(), &buffer) == 0 && !S_ISDIR(buffer.st_mode));
+	stat(path.c_str(), &buffer);
+	return (S_ISDIR(buffer.st_mode) != 0);
 }
 
 bool File::isValid(std::string path)

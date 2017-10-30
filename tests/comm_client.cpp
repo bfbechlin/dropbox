@@ -8,6 +8,7 @@ int main(int argc, char* argv[])
 	ClientComm client;
 	client.connectServer(std::string(argv[1]), atoi(argv[2]));
 	client.sendMessage("MAPLEX");
+	client.sendMessage("0");
 	client.sendFile("client/test.txt");
 
 	files.push_back(File("test.txt"));

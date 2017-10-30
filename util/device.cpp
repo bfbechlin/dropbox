@@ -1,14 +1,32 @@
 #include "device.hpp"
 
-Device::Device(void)
+Device::Device(ActiveProcess active, PassiveProcess passive, FolderManager* folder)
 {
-	this->activeChannel = Communication();
-	this->passiveChannel = Communication();
+	this->active = active;
+	this->passive = passive;
+	this->folder = folder;
 }
 
-Device::Device(Communication activeChannel, Communication passiveChannel, FolderManager *folder)
+void Device::pushAction(Action newAction)
 {
-	this->activeChannel = activeChannel;
-	this->passiveChannel = passiveChannel;
-	this->folder = folder;
+	this->actions.push(newAction);
+}
+
+Action Device::popAction(void)
+{
+	if(!this->actions.empty())
+	{
+		Action action = this->actions.front();
+		this->actions.pop();
+		return action;
+	}
+	else
+	{
+		return Action();
+	}
+}
+
+bool Device::noAction(void)
+{
+	return this->actions.empty();
 }

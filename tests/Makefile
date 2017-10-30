@@ -4,12 +4,13 @@ FLAGS=-O2 -Wall
 CFLAGS=$(FLAGS) $(INCLUDE)
 
 UTIL=../util/timestamp.o ../util/file.o ../util/foldermanager.o ../util/filediff.o\
- ../util/communication.o ../util/activeprocess.o ../util/passiveprocess.o
+ ../util/communication.o ../util/activeprocess.o ../util/passiveprocess.o\
+ ../util/action.o ../util/device.o
 
 SERVER=../server/servercomm.o ../server/database.o
 CLIENT=../client/clientcomm.o
 
-TESTS=commserver.cpp commclient.cpp
+TESTS=comm_server.cpp comm_client.cpp process_server.cpp process_client.cpp
 
 .PHONY: all clean
 

@@ -4,21 +4,26 @@
 #include <map>
 #include <string>
 
-enum actions{INITIALIZE, SYNCHRONIZE, NOTIFY, UPLOAD, DOWNLOAD};
-#define ARG_FILENAME  "fileName"
-#define ARG_DESTPATH "destinationPath"
-#define ARG_SOURCEPATH "sourcePath"
+#define ARG_FILENAME "fileName"
+#define ARG_PATHNAME "pathName"
+
+#define ACTION_INITILIAZE 	"init"
+#define ACTION_SYNCHROZIZE	"synchronize"
+#define ACTION_NOTIFY 		"notify"
+#define ACTION_DELETE  		"delete"
+#define ACTION_DOWNLOAD 	"download"
+#define ACTION_UPLOAD  		"upload"
 
 class Action{
 	private:
-		actions type;
+		std::string type;
 		std::map<std::string, std::string> arguments;
 	public:
-		Action(void);
-		Action(actions type);
-		Action(actions type, std::map<std::string, std::string> arguments);
+		Action(void){};
+		Action(std::string type);
+		Action(std::string type, std::map<std::string, std::string> arguments);
 
-		actions getType(void);
+		std::string getType(void);
 		std::map<std::string, std::string> getArguments(void);
 };
 

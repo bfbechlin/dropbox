@@ -11,13 +11,18 @@ class Device
 {
 	private:
 		FolderManager* folder;
-		std::queue<Action*> actions;
+		std::queue<Action> actions;
+
+		ActiveProcess active;
+		PassiveProcess passive;
 
 	public:
-		Device(void);
-		Device(ActiveProcess active, PassiveProcess passive, FolderManager *folder);
-		ActiveProcess active;
-		ActiveProcess passive;
+		Device(){};
+		Device(ActiveProcess active, PassiveProcess passive, FolderManager* folder);
+
+		void pushAction(Action newAction);
+		Action popAction(void);
+		bool noAction(void);
 };
 
 #endif
