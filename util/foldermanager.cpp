@@ -4,10 +4,23 @@
 #include <stdlib.h>
 #include <sys/types.h>
 #include <dirent.h>
+#include <unistd.h>
+#include <sys/inotify.h>
+
+#define INOTIFY_EVENTS IN_MODIFY | IN_CREATE | IN_DELETE | IN_MOVED_TO | IN_MOVED_FROM | IN_MOVE_SELF
+#define EVENT_SIZE  (sizeof (struct inotify_event))
+#define BUF_LEN     4096
 
 FolderManager::FolderManager(std::string path)
 {
-	this->path = path;
+	if(path.back() == '/')
+	{
+		this->path = path.substr(0, path.size()-1);;
+	}
+	else
+	{
+		this->path = path;
+	}
 
 	if (File::exists(this->path) && !File::isDir(this->path))
 	{
@@ -24,16 +37,44 @@ FolderManager::FolderManager(std::string path)
 		}
 	}
 
+	this->inotifyFd = inotify_init1(IN_NONBLOCK);
+	this->watcherFd = inotify_add_watch(this->inotifyFd, this->path.c_str(), INOTIFY_EVENTS);
+	/* Clear all modification events */
+	this->isModified();
 }
 
-File FolderManager::makeFile(std::string path, std::string name)
+FolderManager::~FolderManager()
 {
-	struct stat buffer;
-	std::string fullPath = path + name;
-	stat(fullPath.c_str(),&buffer);
-	File file(name, buffer.st_atim, buffer.st_mtim);
-	return file;
+	inotify_rm_watch(this->inotifyFd, this->watcherFd);
+	close(this->inotifyFd);
 }
+
+bool FolderManager::isModified(void)
+{
+	char buf[BUF_LEN]
+	   __attribute__ ((aligned(__alignof__(struct inotify_event))));
+	const struct inotify_event *event;
+	ssize_t len;
+	char *ptr;
+	bool modified = false;
+
+	while((len = read(this->inotifyFd, buf, sizeof buf)) > 0)
+	{
+		for (ptr = buf; ptr < buf + len; ptr += EVENT_SIZE + event->len)
+		{
+			event = (const struct inotify_event*) ptr;
+	      	if (event->len)
+			{
+			 	if(!File::isTemp(std::string(event->name)))
+			  	{
+	   				modified = true;
+	   			}
+			}
+		}
+	}
+	return modified;
+}
+
 
 std::vector<File> FolderManager::getFiles(void)
 {
@@ -51,15 +92,9 @@ std::vector<File> FolderManager::getFiles(void)
     while ((file = readdir(dir)) != NULL)
 	{
 		std::string fileName(file->d_name);
-		fullPath = this->path;
-        if(fullPath.back() != '/')
+		if(File::isValid(this->path + '/' + fileName))
 		{
-			fullPath += "/";
-		}
-
-		if(File::isValid(fullPath + fileName))
-		{
-			files.push_back(this->makeFile(fullPath, std::string(file->d_name)));
+			files.push_back(File(this->path, fileName));
 		}
     }
     closedir(dir);
@@ -83,13 +118,7 @@ std::vector<File> FolderManager::getAllFiles(void)
     while ((file = readdir(dir)) != NULL)
 	{
 		std::string fileName(file->d_name);
-		fullPath = this->path;
-        if(fullPath.back() != '/')
-		{
-			fullPath += "/";
-		}
-
-		files.push_back(this->makeFile(fullPath, std::string(file->d_name)));
+		files.push_back(File(this->path, fileName));
     }
     closedir(dir);
 

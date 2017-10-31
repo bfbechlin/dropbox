@@ -12,10 +12,12 @@ class FolderManager
 {
 	private:
 		std::string path;
-		File makeFile(std::string path, std::string name);
+		int inotifyFd;
+		int watcherFd;
 
 	public:
 		FolderManager(void){};
+		~FolderManager(void);
 		/*
 			Initialize inotify
 		*/

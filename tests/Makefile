@@ -10,7 +10,8 @@ UTIL=../util/timestamp.o ../util/file.o ../util/foldermanager.o ../util/filediff
 SERVER=../server/servercomm.o ../server/database.o
 CLIENT=../client/clientcomm.o
 
-TESTS=comm_server.cpp comm_client.cpp process_server.cpp process_client.cpp
+TESTS=comm_server.cpp comm_client.cpp process_server.cpp process_client.cpp\
+ folder_manager.cpp
 
 .PHONY: all clean
 

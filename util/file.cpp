@@ -13,6 +13,15 @@ File::File(std::string name){
 	this->modification = Timestamp();
 }
 
+File::File(std::string path, std::string name){
+	struct stat buffer;
+	std::string fullPath = path + '/' + name;
+	stat(fullPath.c_str(),&buffer);
+	this->name = name;
+	this->access = Timestamp(buffer.st_atim);
+	this->modification = Timestamp(buffer.st_mtim);
+}
+
 File::File(std::string name, Timestamp access, Timestamp mod)
 {
 	this->name = name;

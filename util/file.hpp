@@ -13,6 +13,7 @@ class File
 	public:
 		File(void);
 		File(std::string name);
+		File(std::string path, std::string name);
 		File(std::string name, Timestamp access, Timestamp mod);
 
 		std::string getName(void);
