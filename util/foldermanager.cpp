@@ -188,3 +188,12 @@ FileDiff FolderManager::diff(std::vector<File> remoteFiles)
 
     return FileDiff(created, modified, deleted);
 }
+
+std::string FolderManager::toString() const {
+
+	std::string info(" ");
+
+	info += "\nFolder FD:" + std::to_string(this->inotifyFd) + " at " + this->path + " being watched with descriptor WD:" + std::to_string(this->watcherFd) + ".\n";
+
+	return info;
+}

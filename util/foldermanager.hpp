@@ -49,6 +49,8 @@ class FolderManager
 			DIFF_DELETED: files thar aren't in 'files' but are this folder.
 		*/
 		FileDiff diff(std::vector<File> files);
+
+		std::string toString() const;
 };
 
 #endif

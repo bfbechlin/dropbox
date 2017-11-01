@@ -22,7 +22,6 @@ class File
 
 		std::string toString(void) const;
 
-
 		static bool isTemp(std::string path);
 		static bool isDir(std::string path);
 		static bool isValid(std::string path);

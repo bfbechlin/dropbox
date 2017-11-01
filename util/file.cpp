@@ -53,7 +53,6 @@ std::string File::toString() const
 }
 
 
-
 bool File::isTemp(std::string path)
 {
     return (path.back() == '~');
@@ -62,8 +61,8 @@ bool File::isTemp(std::string path)
 bool File::isDir(std::string path)
 {
     struct stat buffer;
-	stat(path.c_str(), &buffer);
-	return (S_ISDIR(buffer.st_mode) != 0);
+		stat(path.c_str(), &buffer);
+		return (S_ISDIR(buffer.st_mode) != 0);
 }
 
 bool File::isValid(std::string path)

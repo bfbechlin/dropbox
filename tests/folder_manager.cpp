@@ -13,10 +13,7 @@ int main(int argc, char* argv[])
 
 	FolderManager folder(path);
 
-	std::cout << "Verifing for modification at " << path << "\n";
-	std::cout << (folder.isModified() ? "True" : "False") << "\n";
-	std::cout << "write anything and enter to continue:\n";
-	std::cin >> buffer;
+	std::cout << folder.toString();
 
 	std::cout << "Verifing for modification at " << path << "\n";
 	std::cout << (folder.isModified() ? "True" : "False") << "\n";
@@ -27,5 +24,11 @@ int main(int argc, char* argv[])
 	std::cout << (folder.isModified() ? "True" : "False") << "\n";
 	std::cout << "write anything and enter to continue:\n";
 	std::cin >> buffer;
+
+	std::cout << "Verifing for modification at " << path << "\n";
+	std::cout << (folder.isModified() ? "True" : "False") << "\n";
+	std::cout << "write anything and enter to continue:\n";
+	std::cin >> buffer;
+
 	return 0;
 }

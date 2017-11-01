@@ -10,21 +10,23 @@ class FileDiff
 	private:
 	    std::vector<File> createdFiles;
 	    std::vector<File> modifiedFiles;
-		std::vector<File> deletedFiles;
+			std::vector<File> deletedFiles;
 
 	public:
 	    FileDiff(void){};
-		FileDiff(std::vector<File> createdFiles, std::vector<File> modifiedFiles,
+			FileDiff(std::vector<File> createdFiles, std::vector<File> modifiedFiles,
 			std::vector<File> deletedFiles);
 
-		void createdFile(File file);
+			void createdFile(File file);
 	    void modifiedFile(File file);
 	    void deletedFile(File file);
 
 	    std::vector<File> getCreatedFiles(void);
 	    std::vector<File> getModifiedFiles(void);
-		std::vector<File> getDeletedFiles(void);
-	    void display(void);
+			std::vector<File> getDeletedFiles(void);
+
+			std::string toString();
+
 };
 
 
