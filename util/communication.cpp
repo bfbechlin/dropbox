@@ -45,7 +45,6 @@ bool Communication::sendMessage(std::string message)
 	char messageBeginSignal = COMM_MESSAGE_BEGIN;
 	uint32_t messageLenght = strlen(message.c_str());
 	messageLenght = htonl(messageLenght);
-
 	if(write(this->socketFd, &messageBeginSignal, sizeof(messageBeginSignal)) < (int)sizeof(messageBeginSignal))
 		return false;
 

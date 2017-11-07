@@ -10,19 +10,26 @@
 class Device
 {
 	private:
-		FolderManager* folder;
 		std::queue<Action> actions;
 
+	public:
 		ActiveProcess active;
 		PassiveProcess passive;
 
-	public:
-		Device(){};
-		Device(ActiveProcess active, PassiveProcess passive, FolderManager* folder);
+		Device(void){};
+		Device(ActiveProcess active, PassiveProcess passive);
+
+		/* Resquest for a action a blocks until it's resolved */
+		void executeAction(Action action);
+		/* Receive request for a action resolve this request */
+		void processAction(int actionType);
+		int nextActionResquest(void);
 
 		void pushAction(Action newAction);
 		Action popAction(void);
 		bool noAction(void);
+
+
 };
 
 #endif

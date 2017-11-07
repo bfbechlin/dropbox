@@ -22,6 +22,8 @@ class FolderManager
 			Initialize inotify
 		*/
 		FolderManager(std::string path);
+
+		std::string getPath(void);
 		/*
 		 	Verify if has ocurred a modification in this folder since the last
 		 		call for this method or the constructor

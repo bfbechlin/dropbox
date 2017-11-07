@@ -13,7 +13,14 @@ Database::Database(std::string path)
 {
 	struct stat sb;
 
-	this->path = path;
+	if(path.back() == '/')
+	{
+		this->path = path.substr(0, path.size()-1);;
+	}
+	else
+	{
+		this->path = path;
+	}
 
 	if(stat(path.c_str(), &sb) == 0 && !S_ISDIR(sb.st_mode))
 	{
@@ -33,7 +40,7 @@ Database::Database(std::string path)
 
 std::string Database::getPath()
 {
-	return this->path;
+	return std::string(this->path + "/");
 }
 
 bool Database::setPath(std::string newPath)

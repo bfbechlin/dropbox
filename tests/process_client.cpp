@@ -10,7 +10,6 @@
 int main(int argc, char* argv[])
 {
 	ClientComm passiveComm, activeComm;
-	std::map<std::string, std::string> args;
 	FolderManager folder("./client");
 
 	passiveComm.connectServer(std::string(argv[1]), atoi(argv[2]));
@@ -25,11 +24,11 @@ int main(int argc, char* argv[])
 	PassiveProcess passive(&passiveComm, &folder);
 	std::cout << "PASSIVEPROCESS::" << passive.channel->receiveMessage();
 
-	args[ARG_PATHNAME] = "./client/";
-	passive.synchronize(args);
-	args[ARG_FILENAME] = "test.txt";
-	active.deleteFile(args);
-	active.uploadFile(args);
+	std::string path("./client/");
+	std::string fileName("test.txt");
+	passive.synchronize();
+	active.deleteFile(fileName);
+	active.uploadFile(path, fileName);
 
 	return 0;
 }

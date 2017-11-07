@@ -2,36 +2,50 @@
 #include "filediff.hpp"
 #include <unistd.h>
 
-void PassiveProcess::synchronize(std::map<std::string, std::string> arguments)
+#include <iostream>
+
+PassiveProcess::PassiveProcess(void)
+{
+	this->channel = NULL;
+	this->folder = NULL;
+}
+
+PassiveProcess::PassiveProcess(Communication* channel, FolderManager *folder)
+{
+	this->channel = channel;
+	this->folder = folder;
+}
+
+void PassiveProcess::synchronize(void)
 {
 	std::vector<File> files = this->folder->getFiles();
 	this->channel->push(files);
 	int downloads = std::stoi(this->channel->receiveMessage());
 	for(int i = 0; i < downloads; i++) {
-		this->downloadFile(arguments);
+		this->downloadFile();
 	}
 }
 
-void PassiveProcess::deleteFile(std::map<std::string, std::string> arguments)
+void PassiveProcess::deleteFile(void)
 {
 	std::string fileName = this->channel->receiveMessage();
-	std::string path = arguments[ARG_PATHNAME] + fileName;
+	std::string path = this->folder->getPath() + fileName;
 	unlink(path.c_str());
 }
 
-void PassiveProcess::uploadFile(std::map<std::string, std::string> arguments)
+void PassiveProcess::uploadFile(void)
 {
 	std::string fileName = this->channel->receiveMessage();
-	this->channel->receiveFile(arguments[ARG_PATHNAME] + fileName);
+	this->channel->receiveFile(this->folder->getPath() + fileName);
 }
 
-void PassiveProcess::downloadFile(std::map<std::string, std::string> arguments)
+void PassiveProcess::downloadFile(void)
 {
 	std::string fileName = this->channel->receiveMessage();
-	this->channel->sendFile(arguments[ARG_PATHNAME] + fileName);
+	this->channel->sendFile(this->folder->getPath() + fileName);
 }
 
-std::string PassiveProcess::parseActionResquest(void)
+int PassiveProcess::parseActionResquest(void)
 {
-	return this->channel->receiveMessage();
+	return std::stoi(this->channel->receiveMessage());
 }

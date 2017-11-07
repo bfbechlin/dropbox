@@ -1,20 +1,61 @@
 #include "action.hpp"
 
-Action::Action(std::string type)
+Action::Action(int type)
 {
+	std::map<std::string, std::string> args;
 	this->type = type;
+	this->arguments = args;
+	this->signalVar = NULL;
 }
 
-Action::Action(std::string type, std::map<std::string, std::string> arguments)
+Action::Action(int type, std::map<std::string, std::string> arguments)
 {
 	this->type = type;
 	this->arguments = arguments;
+	this->signalVar = NULL;
 }
 
-std::string Action::getType(void)
+
+Action::Action(int type, std::map<std::string, std::string> arguments,
+	std::condition_variable* signalVar)
+{
+	this->type = type;
+	this->arguments = arguments;
+	this->signalVar = signalVar;
+}
+
+void Action::signal(void){
+	if(this->signalVar != NULL)
+	{
+		this->signalVar->notify_all();
+	}
+}
+
+int Action::getType(void)
 {
 	return this->type;
 }
+
+std::string Action::getTypeName(void)
+{
+	switch (this->type) {
+		case ACTION_INITILIAZE:
+			return std::string("Initialize");
+		case ACTION_SYNCHRONIZE:
+			return std::string("Synchronize");
+		case ACTION_NOTIFY:
+			return std::string("Notify");
+		case ACTION_DELETE:
+			return std::string("Delete");
+		case ACTION_DOWNLOAD:
+			return std::string("Download");
+		case ACTION_UPLOAD:
+			return std::string("Upload");
+		default:
+			return std::string("");
+	}
+}
+
 std::map<std::string, std::string> Action::getArguments(void)
 {
 	return this->arguments;

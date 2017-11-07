@@ -52,6 +52,12 @@ ServerComm::ServerComm(int port)
 		fprintf(stderr, "[server]~: ERROR on binding socket with port %i.\n", this->port);
 		exit(1);
 	}
+
+	if((listen(this->socketFd, 8)) != 0)
+	{
+		fprintf(stderr, "[server]~: ERROR on listing new connections.\n");
+		exit(1);
+	}
 }
 
 ServerComm::ServerComm(int port, int socketFd){
@@ -59,17 +65,11 @@ ServerComm::ServerComm(int port, int socketFd){
 	this->socketFd = socketFd;
 }
 
-ServerComm ServerComm::newConnection(void)
+ServerComm* ServerComm::newConnection(void)
 {
 	int clientSocket;
 	struct sockaddr_in clientAddr;
 	socklen_t clientAddrLen = sizeof(clientAddr);
-
-	if((listen(this->socketFd, 8)) != 0)
-	{
-		fprintf(stderr, "[server]~: ERROR on listing new connections.\n");
-		exit(1);
-	}
 
 	if((clientSocket = accept(this->socketFd, (struct sockaddr *) &clientAddr, (socklen_t *) &clientAddrLen)) < 0)
 	{
@@ -78,5 +78,5 @@ ServerComm ServerComm::newConnection(void)
 	}
 
 	fprintf(stderr, "[server]~: SUCCESS accepted connection with %s:%i\n", inet_ntoa(clientAddr.sin_addr), ntohs(clientAddr.sin_port));
-	return ServerComm(this->port, clientSocket);
+	return new ServerComm(this->port, clientSocket);
 }

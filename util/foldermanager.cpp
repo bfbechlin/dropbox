@@ -49,6 +49,11 @@ FolderManager::~FolderManager()
 	close(this->inotifyFd);
 }
 
+std::string FolderManager::getPath(void)
+{
+	return std::string(this->path + '/');
+}
+
 bool FolderManager::isModified(void)
 {
 	char buf[BUF_LEN]

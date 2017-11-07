@@ -2,7 +2,21 @@
 #include "filediff.hpp"
 #include <unistd.h>
 
-void ActiveProcess::synchronize(std::map<std::string, std::string> arguments)
+#include <iostream>
+
+ActiveProcess::ActiveProcess(void)
+{
+	this->channel = NULL;
+	this->folder = NULL;
+}
+
+ActiveProcess::ActiveProcess(Communication* channel, FolderManager *folder)
+{
+	this->channel = channel;
+	this->folder = folder;
+}
+
+void ActiveProcess::synchronize(void)
 {
 	std::vector<File> remoteFiles = this->channel->pull();
 
@@ -14,7 +28,7 @@ void ActiveProcess::synchronize(std::map<std::string, std::string> arguments)
 	/* Remove deleted files */
 	for (std::vector<File>::iterator it = deleted.begin(); it != deleted.end(); ++it)
 	{
-		std::string path = arguments[ARG_PATHNAME] + (*it).getName();
+		std::string path = this->folder->getPath() + (*it).getName();
 		unlink(path.c_str());
 	}
 
@@ -24,31 +38,28 @@ void ActiveProcess::synchronize(std::map<std::string, std::string> arguments)
 	this->channel->sendMessage(std::to_string(downloads.size()));
 	for (std::vector<File>::iterator it = downloads.begin(); it != downloads.end(); ++it)
 	{
-		std::map<std::string, std::string> args;
-		args[ARG_FILENAME] = (*it).getName();
-		args[ARG_PATHNAME] = arguments[ARG_PATHNAME];
-		this->downloadFile(args);
+		this->downloadFile(this->folder->getPath(), (*it).getName());
 	}
 }
 
-void ActiveProcess::deleteFile(std::map<std::string, std::string> arguments)
+void ActiveProcess::deleteFile(std::string fileName)
 {
-	this->channel->sendMessage(arguments[ARG_FILENAME]);
+	this->channel->sendMessage(fileName);
 }
 
-void ActiveProcess::uploadFile(std::map<std::string, std::string> arguments)
+void ActiveProcess::uploadFile(std::string path, std::string fileName)
 {
-	this->channel->sendMessage(arguments[ARG_FILENAME]);
-	this->channel->sendFile(arguments[ARG_PATHNAME] + arguments[ARG_FILENAME]);
+	this->channel->sendMessage(fileName);
+	this->channel->sendFile(path + fileName);
 }
 
-void ActiveProcess::downloadFile(std::map<std::string, std::string> arguments)
+void ActiveProcess::downloadFile(std::string path, std::string fileName)
 {
-	this->channel->sendMessage(arguments[ARG_FILENAME]);
-	this->channel->receiveFile(arguments[ARG_PATHNAME] + arguments[ARG_FILENAME]);
+	this->channel->sendMessage(fileName);
+	this->channel->receiveFile(path + fileName);
 }
 
 void ActiveProcess::sendActionResquest(Action action)
 {
-	this->channel->sendMessage(action.getType());
+	this->channel->sendMessage(std::to_string(action.getType()));
 }

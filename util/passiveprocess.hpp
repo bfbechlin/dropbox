@@ -8,20 +8,22 @@
 #include "communication.hpp"
 #include "foldermanager.hpp"
 
-class PassiveProcess: public Process
+class PassiveProcess
 {
+	private:
+		FolderManager* folder;
 	public:
-		PassiveProcess(void)
-		: Process(){};
-		PassiveProcess(Communication* channel, FolderManager *folder)
-		: Process(channel, folder){};
+		Communication* channel;
 
-		void synchronize(std::map<std::string, std::string> arguments);
-		void deleteFile(std::map<std::string, std::string> arguments);
-		void uploadFile(std::map<std::string, std::string> arguments);
-		void downloadFile(std::map<std::string, std::string> arguments);
+		PassiveProcess(void);
+		PassiveProcess(Communication* channel, FolderManager *folder);
 
-		std::string parseActionResquest(void);
+		void synchronize(void);
+		void deleteFile(void);
+		void uploadFile(void);
+		void downloadFile(void);
+
+		int parseActionResquest(void);
 };
 
 #endif

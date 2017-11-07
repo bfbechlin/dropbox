@@ -4,23 +4,24 @@
 #include <string>
 #include <vector>
 #include "action.hpp"
-#include "process.hpp"
 #include "communication.hpp"
 #include "foldermanager.hpp"
 
-class ActiveProcess: public Process
+class ActiveProcess
 {
+	private:
+		FolderManager* folder;
 	public:
-		ActiveProcess(void)
-		: Process(){};
-		ActiveProcess(Communication* channel, FolderManager *folder)
-		: Process(channel, folder){};
+		Communication* channel;
 
-		void synchronize(std::map<std::string, std::string> arguments);
-		void deleteFile(std::map<std::string, std::string> arguments);
-		void uploadFile(std::map<std::string, std::string> arguments);
-		void downloadFile(std::map<std::string, std::string> arguments);
-		
+		ActiveProcess(void);
+		ActiveProcess(Communication* channel, FolderManager *folder);
+
+		void synchronize(void);
+		void deleteFile(std::string fileName);
+		void uploadFile(std::string path, std::string fileName);
+		void downloadFile(std::string path, std::string fileName);
+
 		void sendActionResquest(Action action);
 };
 
