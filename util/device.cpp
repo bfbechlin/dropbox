@@ -4,6 +4,15 @@ Device::Device(ActiveProcess active, PassiveProcess passive)
 {
 	this->active = active;
 	this->passive = passive;
+	this->endConn = false;
+}
+
+bool Device::isEndConnection(void){
+	return this->endConn;
+}
+
+void Device::endConnection(void){
+	this->endConn = true;
 }
 
 void Device::executeAction(Action action)
@@ -34,6 +43,9 @@ void Device::executeAction(Action action)
 			break;
 		case ACTION_UPLOAD:
 			this->active.uploadFile(args[ARG_PATHNAME], args[ARG_FILENAME]);
+			break;
+		case ACTION_EXIT:
+			this->endConnection();
 			break;
 	}
 	action.signal();
@@ -66,6 +78,9 @@ void Device::processAction(int actionType){
 			break;
 		case ACTION_UPLOAD:
 			this->passive.uploadFile();
+			break;
+		case ACTION_EXIT:
+			this->endConnection();
 			break;
 	}
 }

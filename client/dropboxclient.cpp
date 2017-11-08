@@ -7,22 +7,31 @@
 #include <iterator>
 #include <thread>
 #include <chrono>
+#include <csignal>
 
-void activeThread(ClientUser* user)
+ClientUser* user;
+
+void signalHandler( int signum ) {
+	user->device->pushAction(ACTION_EXIT);
+	std::this_thread::sleep_for(std::chrono::milliseconds(500));
+	exit(0);
+}
+
+void activeThread(ClientUser* user, Device* device)
 {
-	while(1)
+	while(!device->isEndConnection())
 		user->executeAction();
 }
 
-void passiveThread(ClientUser* user)
+void passiveThread(ClientUser* user, Device* device)
 {
-	while(1)
+	while(!device->isEndConnection())
 		user->processResquest();
 }
 
-void notifyThread(ClientUser* user, FolderManager* folder)
+void notifyThread(ClientUser* user, Device* device, FolderManager* folder)
 {
-	while(1){
+	while(!device->isEndConnection()){
 		if(folder->isModified()){
 			std::cout << "MODIFIED"<< "\n";
 			user->device->pushAction(Action(ACTION_NOTIFY));
@@ -33,7 +42,7 @@ void notifyThread(ClientUser* user, FolderManager* folder)
 
 int main(int argc, char* argv[])
 {
-	ClientUser user;
+	signal(SIGINT, signalHandler);
 	if(argc != 5 && argc != 4)
 	{
 		std::cout << "Usage:\n\t ./dropboxServer <USERNAME> <ADRESS_SERVER> <PORT_SERVER> <SYNC_DYR>\n\tDefault sync_dir: /sync_dir_<USER>/\n";
@@ -64,14 +73,16 @@ int main(int argc, char* argv[])
 		PassiveProcess(passiveComm, thisFolder)
 	);
 	thisDevice->pushAction(Action(ACTION_INITILIAZE));
-	user = ClientUser(userName, thisFolder, thisDevice);
-	std::thread act(activeThread, &user);
-	std::thread pass(passiveThread, &user);
-	std::thread noti(notifyThread, &user, thisFolder);
+	user = new ClientUser(userName, thisFolder, thisDevice);
+
+	std::thread act(activeThread, user, thisDevice);
+	std::thread pass(passiveThread, user, thisDevice);
+	std::thread noti(notifyThread, user, thisDevice, thisFolder);
 	act.join();
 	pass.join();
 	noti.join();
 
+	delete user;
 	delete thisDevice;
 	delete thisFolder;
 	delete activeComm;

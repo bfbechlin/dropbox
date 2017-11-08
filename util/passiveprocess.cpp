@@ -57,5 +57,11 @@ void PassiveProcess::downloadFile(void)
 
 int PassiveProcess::parseActionResquest(void)
 {
-	return std::stoi(this->channel->receiveMessage());
+	std::string message = this->channel->receiveMessage();
+	if(message == std::string(""))
+	{
+		std::cout << "BROKEN SOCKET" << "\n";
+		exit(0);
+	}
+	return std::stoi(message);
 }

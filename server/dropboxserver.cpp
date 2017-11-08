@@ -4,39 +4,67 @@
 #include "serveruser.hpp"
 #include "device.hpp"
 
+
 #include <iostream>
 #include <iterator>
 #include <vector>
 #include <thread>
 
-int userLogedIndex(std::vector<ServerUser*> users, std::string userName)
-{
-	int i = -1;
-	for (std::vector<ServerUser*>::iterator it = users.begin(); it != users.end(); ++it)
-	{
-		i++;
-		if((*it)->getName() == userName)
-			return i;
-	}
-	return -1;
-}
+std::vector<ServerUser*> users;
 
 void activeThread(ServerUser* user, Device* device)
 {
-	while(1)
+	while(!device->isEndConnection())
 		user->executeAction(device);
+
 }
 
 void passiveThread(ServerUser* user, Device* device)
 {
-	while(1)
+	while(!device->isEndConnection()){
+		std::this_thread::sleep_for(std::chrono::milliseconds(500));
 		user->processResquest(device);
+	}
+}
 
+void initThread(ServerUser* user, Device* device)
+{
+	std::thread act(activeThread, user, device);
+	std::thread pass(passiveThread, user, device);
+
+	act.join();
+	pass.join();
+
+	std::cout << "END CONNECTION" << "\n";
+	user->removeDevice(device);
+	/* No user logged in this session */
+	if(user->noDevices())
+	{
+		for (std::vector<ServerUser*>::iterator it = users.begin(); it != users.end(); ++it)
+		{
+			if((*it) == user)
+			{
+				users.erase(it);
+				delete user->folder;
+				delete user;
+				break;
+			}
+		}
+	}
+	std::cout << "USERS ";
+	for (std::vector<ServerUser*>::iterator it = users.begin(); it != users.end(); ++it)
+	{
+		std::cout << (*it)->getName() << " ";
+	}
+	std::cout << "\n";
+	delete device->active.channel;
+	delete device->passive.channel;
+	delete device;
 }
 
 int main(int argc, char* argv[])
 {
-	std::vector<ServerUser*> users;
+
 	if(argc != 3 && argc != 2)
 	{
 		std::cout << "Usage:\n\t ./dropboxServer <PORT> <DATABASE>\n\tDefault database: ./database\n";
@@ -64,19 +92,23 @@ int main(int argc, char* argv[])
 
 		userName = passiveComm->receiveMessage();
 		std::cout << "[server]~: user " << userName << " logged in.\n";
+
 		ServerUser* thisUser;
-		int index;
-		if((index = userLogedIndex(users, userName)) == -1)
+		bool found = false;
+		for (std::vector<ServerUser*>::iterator it = users.begin(); it != users.end(); ++it)
 		{
+			if((*it)->getName() == userName)
+			{
+				thisUser = (*it);
+				found = true;
+			}
+		}
+		if(!found){
 			FolderManager* thisFolder = new FolderManager(std::string(
 				database->getPath() + "sync_dir_" + userName
 			));
 			thisUser = new ServerUser(userName, thisFolder);
 			users.push_back(thisUser);
-		}
-		else
-		{
-			thisUser = users[index];
 		}
 		FolderManager* thisFolder = thisUser->getFolder();
 		Device* thisDevice = new Device(
@@ -84,10 +116,8 @@ int main(int argc, char* argv[])
 			PassiveProcess(passiveComm, thisFolder)
 		);
 		thisUser->newDevice(thisDevice);
-		std::thread act(activeThread, thisUser, thisDevice);
-		std::thread pass(passiveThread, thisUser, thisDevice);
-		act.detach();
-		pass.detach();
+		std::thread init(initThread, thisUser, thisDevice);
+		init.detach();
 	}
 
 	return 0;

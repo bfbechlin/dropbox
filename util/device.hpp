@@ -11,7 +11,7 @@ class Device
 {
 	private:
 		std::queue<Action> actions;
-
+		bool endConn;
 	public:
 		ActiveProcess active;
 		PassiveProcess passive;
@@ -19,6 +19,8 @@ class Device
 		Device(void){};
 		Device(ActiveProcess active, PassiveProcess passive);
 
+		void endConnection(void);
+		bool isEndConnection(void);
 		/* Resquest for a action a blocks until it's resolved */
 		void executeAction(Action action);
 		/* Receive request for a action resolve this request */

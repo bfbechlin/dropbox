@@ -30,6 +30,22 @@ void ServerUser::newDevice(Device* device)
 	this->devices.push_back(device);
 }
 
+void ServerUser::removeDevice(Device* device)
+{
+	for (std::vector<Device*>::iterator it = this->devices.begin(); it != this->devices.end(); ++it)
+	{
+		if((*it) == device){
+			this->devices.erase(it);
+			break;
+		}
+	}
+}
+
+bool ServerUser::noDevices(void)
+{
+	return this->devices.empty();
+}
+
 void ServerUser::processResquest(Device* device)
 {
 	/* Blockable call */
@@ -47,7 +63,9 @@ void ServerUser::processResquest(Device* device)
 void ServerUser::executeAction(Device* device)
 {
 	/* Busy Waiting for actions */
-	while(device->noAction());
+	if(device->noAction()){
+		return;
+	}
 	Action nextAction = device->popAction();
 	int actionType = nextAction.getType();
 	std::cout << "EXECUTING " << nextAction.getTypeName() << "\n";
@@ -61,10 +79,13 @@ void ServerUser::executeAction(Device* device)
 
 void ServerUser::notifyOthers(Device* device)
 {
+	std::cout << "NOTIFY ";
 	for (std::vector<Device*>::iterator it = this->devices.begin(); it != this->devices.end(); ++it)
 	{
+		std::cout << static_cast<void*>((*it)) << " ";
 		if((*it) != device){
 			(*it)->pushAction(Action(ACTION_NOTIFY));
 		}
 	}
+	std::cout << "\n";
 }
