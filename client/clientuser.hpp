@@ -9,14 +9,21 @@ class ClientUser
 {
 	private:
 		std::string name;
-		FolderManager* folder;
+		bool synchronized;
 
 	public:
+		FolderManager* folder;
+
 		Device* device;
 		ClientUser(void){};
 		ClientUser(std::string name, FolderManager* folder, Device* device);
 
+		FolderManager* getFolder(void);
+		void setFolder(FolderManager* folder);
+
 		std::string getName(void);
+		bool isSynchronized(void);
+		void synchronize(void);
 		void processResquest(void);
 		void executeAction(void);
 };

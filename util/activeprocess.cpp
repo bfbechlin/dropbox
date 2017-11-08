@@ -17,6 +17,11 @@ ActiveProcess::ActiveProcess(Communication* channel, FolderManager *folder)
 	this->folder = folder;
 }
 
+void ActiveProcess::setFolder(FolderManager* folder)
+{
+	this->folder = folder;
+}
+
 void ActiveProcess::synchronize(void)
 {
 	std::vector<File> remoteFiles = this->channel->pull();

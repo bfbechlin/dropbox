@@ -24,6 +24,7 @@ class ServerUser
 		void newDevice(Device* device);
 		void removeDevice(Device* device);
 		bool noDevices(void);
+
 		void processResquest(Device* device);
 		void executeAction(Device* device);
 		void notifyOthers(Device* device);

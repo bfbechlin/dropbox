@@ -18,11 +18,11 @@ ClientUser* user;
 
 void signalHandler( int signum ) {
 	user->device->pushAction(ACTION_EXIT);
-	std::this_thread::sleep_for(std::chrono::milliseconds(500));
+	std::this_thread::sleep_for(std::chrono::seconds(1));
 	exit(0);
 }
 
-void ioThread(ClientUser* user, Device* device, FolderManager* folder)
+void ioThread(Device* device)
 {
 	while(!device->isEndConnection())
 	{
@@ -39,13 +39,9 @@ void ioThread(ClientUser* user, Device* device, FolderManager* folder)
 			command = line.substr(0, pos);
 			line = line.substr(pos+1, std::string::npos);
 			if(line != "")
-			{
 				argument = line;
-			}
 			else
-			{
 				argument = "";
-			}
 			line = "";
 		}
 		else
@@ -78,16 +74,44 @@ void ioThread(ClientUser* user, Device* device, FolderManager* folder)
 			device->pushAction(Action(ACTION_LIST));
 		}
 		else if(command == "list_client"){
-			std::vector<File> files = folder->getFiles();
-			std::cout << File::toString(files);
+			if(!user->isSynchronized()){
+				std::cout << "\tUser not synchronized with remote server.\n";
+			} else {
+				std::vector<File> files = user->folder->getFiles();
+				std::cout << File::toString(files);
+			}
 		}
 		else if(command == "get_sync_dir"){
-
+			if(!user->isSynchronized()){
+				FolderManager* folder;
+				if(argument != ""){
+					folder = new FolderManager(argument);
+					if(!File::isDir(argument)){
+						std::cout << "\tDirectory" << argument <<" not exists and cannot be created .\n";
+						delete folder;
+					} else {
+						user->setFolder(folder);
+						user->synchronize();
+						device->pushAction(Action(ACTION_INITILIAZE));
+					}
+				} else {
+					std::string path = "/sync_dir_" + user->getName();
+					folder = new FolderManager(path);
+					if(!File::isDir(path)){
+						std::cout << "\tDirectory" << path <<" not exists and cannot be created .\n";
+						delete folder;
+					} else {
+						user->setFolder(folder);
+						user->synchronize();
+						device->pushAction(Action(ACTION_INITILIAZE));
+					}
+				}
+			} else {
+				std::cout << "\tAlready synchronized at'" << user->folder->getPath() << "'.\n";
+			}
 		}
 		else if(command == "exit"){
-			device->pushAction(Action(ACTION_EXIT));
-			std::this_thread::sleep_for(std::chrono::milliseconds(500));
-			exit(0);
+			signalHandler(0);
 		}
 		else if(command == "help"){
 			std::cout << "Commands: ";
@@ -105,24 +129,25 @@ void ioThread(ClientUser* user, Device* device, FolderManager* folder)
 	}
 }
 
-void activeThread(ClientUser* user, Device* device)
+void activeThread(Device* device)
 {
 	while(!device->isEndConnection())
 		user->executeAction();
 }
 
-void passiveThread(ClientUser* user, Device* device)
+void passiveThread(Device* device)
 {
 	while(!device->isEndConnection())
 		user->processResquest();
 }
 
-void notifyThread(ClientUser* user, Device* device, FolderManager* folder)
+void notifyThread(Device* device, FolderManager* folder)
 {
 	while(!device->isEndConnection()){
-		if(folder->isModified()){
-			std::cout << "MODIFIED"<< "\n";
-			user->device->pushAction(Action(ACTION_NOTIFY));
+		if(user->isSynchronized()){
+			if(user->folder->isModified()){
+				user->device->pushAction(Action(ACTION_NOTIFY));
+			}
 		}
 		std::this_thread::sleep_for(std::chrono::seconds(1));
 	}
@@ -133,7 +158,7 @@ int main(int argc, char* argv[])
 	signal(SIGINT, signalHandler);
 	if(argc != 5 && argc != 4)
 	{
-		std::cout << "Usage:\n\t ./dropboxServer <USERNAME> <ADRESS_SERVER> <PORT_SERVER> <SYNC_DYR>\n\tDefault sync_dir: /sync_dir_<USER>/\n";
+		std::cout << "Usage:\n\t ./dropboxServer <USERNAME> <ADRESS_SERVER> <PORT_SERVER> [SYNC_DIR]\n";
 		exit(1);
 	}
 	std::string userName(argv[1]);
@@ -147,35 +172,29 @@ int main(int argc, char* argv[])
 
 	activeComm->sendMessage(userName);
 
-	std::string folderPath;
+	FolderManager* thisFolder;
 	if(argc == 5){
-		folderPath = std::string(argv[4]);
+		thisFolder = new FolderManager(std::string(argv[4]));
 	}
 	else {
-		folderPath = std::string("/sync_dir_" + userName);
+		thisFolder = NULL;
 	}
 
-	FolderManager* thisFolder = new FolderManager(folderPath);
 	Device* thisDevice = new Device(
 		ActiveProcess(activeComm, thisFolder),
 		PassiveProcess(passiveComm, thisFolder)
 	);
-	thisDevice->pushAction(Action(ACTION_INITILIAZE));
-	user = new ClientUser(userName, thisFolder, thisDevice);
 
-	std::thread act(activeThread, user, thisDevice);
-	std::thread pass(passiveThread, user, thisDevice);
-	std::thread noti(notifyThread, user, thisDevice, thisFolder);
-	std::thread io(ioThread, user, thisDevice, thisFolder);
-	act.join();
-	pass.join();
-	noti.join();
+	user = new ClientUser(userName, thisFolder, thisDevice);
+	if(argc == 5) {
+		user->synchronize();
+	}
+	std::thread io(ioThread, thisDevice);
+	std::thread act(activeThread, thisDevice);
+	std::thread pass(passiveThread, thisDevice);
+	std::thread noti(notifyThread, thisDevice, thisFolder);
+
 	io.join();
 
-	delete user;
-	delete thisDevice;
-	delete thisFolder;
-	delete activeComm;
-	delete passiveComm;
 	return 0;
 }

@@ -26,14 +26,14 @@ FolderManager::FolderManager(std::string path)
 	{
 		fprintf(stderr, "[FolderManager]~: ERROR entry %s already exists and not is a diretory.\n",
 			path.c_str());
-			exit(2);
+			//exit(2);
 	}
 	if(!File::exists(this->path))
 	{
 		if(mkdir(this->path.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH) < 0){
 			fprintf(stderr, "[FolderManager]~: ERROR impossible to create folder %s.\n",
 			this->path.c_str());
-			exit(2);
+			//exit(2);
 		}
 	}
 

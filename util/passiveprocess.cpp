@@ -16,6 +16,11 @@ PassiveProcess::PassiveProcess(Communication* channel, FolderManager *folder)
 	this->folder = folder;
 }
 
+void PassiveProcess::setFolder(FolderManager* folder)
+{
+	this->folder = folder;
+}
+
 void PassiveProcess::synchronize(void)
 {
 	std::vector<File> files = this->folder->getFiles();

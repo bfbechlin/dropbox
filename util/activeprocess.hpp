@@ -17,6 +17,8 @@ class ActiveProcess
 		ActiveProcess(void);
 		ActiveProcess(Communication* channel, FolderManager *folder);
 
+		void setFolder(FolderManager* folder);
+
 		void synchronize(void);
 		void merge(void);
 		void deleteFile(std::string fileName);

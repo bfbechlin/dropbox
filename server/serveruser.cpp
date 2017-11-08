@@ -95,5 +95,5 @@ std::string ServerUser::toString(void)
 		devs << "device" << static_cast<void*>((*it)) << " ";
 	}
 
-	return std::string(this->name ": " + devs.str());
+	return std::string(this->name + ": " + devs.str());
 }
