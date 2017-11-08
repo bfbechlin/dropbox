@@ -79,7 +79,7 @@ int main(int argc, char* argv[])
 			database = new Database("./database");
 	}
 
-	std::cout << "[server]~: dropbox server is up, database: " << database->getPath() << "\n";
+	std::cout << "[server]~: dropbox server is up at port " << atoi(argv[1]) <<", database: " << database->getPath() << "\n";
 	while(1){
 		std::cout << "[server]~: waiting for new users " << "\n";
 		std::string userName;

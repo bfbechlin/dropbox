@@ -21,7 +21,7 @@ class ActiveProcess
 
 		void synchronize(void);
 		void merge(void);
-		void deleteFile(std::string fileName);
+		std::string deleteFile(std::string fileName);
 		void uploadFile(std::string path, std::string fileName);
 		std::string downloadFile(std::string path, std::string fileName);
 		std::string list(void);

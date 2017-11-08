@@ -70,9 +70,14 @@ void ActiveProcess::merge(void)
 	}
 }
 
-void ActiveProcess::deleteFile(std::string fileName)
+std::string ActiveProcess::deleteFile(std::string fileName)
 {
 	this->channel->sendMessage(fileName);
+	if(this->channel->receiveMessage() == "OK")
+		return std::string("File " + fileName + " was deleted successfull.\n");
+
+	else
+		return std::string("Delete error, file " + fileName + " doesn't exists in remote files.\n");
 }
 
 void ActiveProcess::uploadFile(std::string path, std::string fileName)

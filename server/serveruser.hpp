@@ -2,12 +2,17 @@
 #define __SERVERUSER_HPP__
 
 #include <string>
+#include <mutex>
 #include "foldermanager.hpp"
 #include "device.hpp"
 
 class ServerUser
 {
 	private:
+		std::mutex lReader;
+		std::mutex lRW;
+		int readers;
+
 		std::string name;
 		std::vector<Device*> devices;
 
@@ -28,6 +33,7 @@ class ServerUser
 		void processResquest(Device* device);
 		void executeAction(Device* device);
 		void notifyOthers(Device* device);
+		void notifyAll(void);
 
 		std::string toString(void);
 };

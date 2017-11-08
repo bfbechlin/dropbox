@@ -88,6 +88,17 @@ void ioThread(Device* device)
 			response.wait(lck);
 			std::cout << device->getMessage();
 		}
+		else if(command == "delete"){
+			std::map<std::string, std::string> args;
+			if(argument == ""){
+				std::cout << "\tCommand 'delete' needs argument. Type 'help' for more information.\n";
+			}
+			args[ARG_FILENAME] = argument;
+			std::unique_lock<std::mutex> lck(block);
+			device->pushAction(Action(ACTION_DELETE, args, &response));
+			response.wait(lck);
+			std::cout << device->getMessage();
+		}
 		else if(command == "list_server"){
 			std::unique_lock<std::mutex> lck(block);
 			device->pushAction(Action(ACTION_LIST, &response));
@@ -209,6 +220,7 @@ int main(int argc, char* argv[])
 	user = new ClientUser(userName, thisFolder, thisDevice);
 	if(argc == 5) {
 		user->synchronize();
+		thisDevice->pushAction(Action(ACTION_INITILIAZE));
 	}
 	std::thread io(ioThread, thisDevice);
 	std::thread act(activeThread, thisDevice);

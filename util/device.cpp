@@ -45,7 +45,7 @@ void Device::executeAction(Action action)
 		case ACTION_NOTIFY:
 			break;
 		case ACTION_DELETE:
-			this->active.deleteFile(args[ARG_FILENAME]);
+			this->buffer = this->active.deleteFile(args[ARG_FILENAME]);
 			break;
 		case ACTION_DOWNLOAD:
 			this->buffer = this->active.downloadFile(args[ARG_PATHNAME], args[ARG_FILENAME]);

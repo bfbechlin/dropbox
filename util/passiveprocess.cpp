@@ -44,8 +44,12 @@ void PassiveProcess::merge(void)
 void PassiveProcess::deleteFile(void)
 {
 	std::string fileName = this->channel->receiveMessage();
-	std::string path = this->folder->getPath() + fileName;
-	unlink(path.c_str());
+	std::string pathName = this->folder->getPath() + fileName;
+	if(File::exists(pathName) && File::isValid(pathName))
+		this->channel->sendMessage("OK");
+	else
+		this->channel->sendMessage("ERROR");
+	unlink(pathName.c_str());
 }
 
 void PassiveProcess::uploadFile(void)
