@@ -44,6 +44,9 @@ void Device::executeAction(Action action)
 		case ACTION_UPLOAD:
 			this->active.uploadFile(args[ARG_PATHNAME], args[ARG_FILENAME]);
 			break;
+		case ACTION_LIST:
+			this->active.list();
+			break;
 		case ACTION_EXIT:
 			this->endConnection();
 			break;
@@ -78,6 +81,9 @@ void Device::processAction(int actionType){
 			break;
 		case ACTION_UPLOAD:
 			this->passive.uploadFile();
+			break;
+		case ACTION_LIST:
+			this->passive.list();
 			break;
 		case ACTION_EXIT:
 			this->endConnection();

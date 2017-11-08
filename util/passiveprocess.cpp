@@ -52,16 +52,26 @@ void PassiveProcess::uploadFile(void)
 void PassiveProcess::downloadFile(void)
 {
 	std::string fileName = this->channel->receiveMessage();
+	std::string pathName = this->folder->getPath() + fileName;
+	if(File::exists(pathName) && File::isValid(pathName))
+		this->channel->sendMessage("OK");
+	else
+		this->channel->sendMessage("ERROR");
+
 	this->channel->sendFile(this->folder->getPath() + fileName);
+}
+
+void PassiveProcess::list(void)
+{
+	std::vector<File> files = this->folder->getFiles();
+	this->channel->push(files);
 }
 
 int PassiveProcess::parseActionResquest(void)
 {
 	std::string message = this->channel->receiveMessage();
 	if(message == std::string(""))
-	{
-		std::cout << "BROKEN SOCKET" << "\n";
 		exit(0);
-	}
+
 	return std::stoi(message);
 }

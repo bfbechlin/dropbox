@@ -9,11 +9,14 @@ ClientUser::ClientUser(std::string name, FolderManager* folder, Device* device)
 	this->folder = folder;
 }
 
+std::string ClientUser::getName(void)
+{
+	return this->name;
+}
+
 void ClientUser::processResquest(void)
 {
 	int actionType = this->device->nextActionResquest();
-	Action test(actionType);
-	std::cout << "PROCESSING " << test.getTypeName() << "\n";
 	this->device->processAction(actionType);
 }
 
@@ -22,6 +25,5 @@ void ClientUser::executeAction(void)
 	/* Busy Waiting for actions */
 	while(this->device->noAction());
 	Action nextAction = this->device->popAction();
-	std::cout << "EXECUTING " << nextAction.getTypeName() << "\n";
 	this->device->executeAction(nextAction);
 }

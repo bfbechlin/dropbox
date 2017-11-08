@@ -23,6 +23,7 @@ class PassiveProcess
 		void deleteFile(void);
 		void uploadFile(void);
 		void downloadFile(void);
+		void list(void);
 
 		int parseActionResquest(void);
 };

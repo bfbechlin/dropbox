@@ -35,7 +35,6 @@ void initThread(ServerUser* user, Device* device)
 	act.join();
 	pass.join();
 
-	std::cout << "END CONNECTION" << "\n";
 	user->removeDevice(device);
 	/* No user logged in this session */
 	if(user->noDevices())
@@ -51,12 +50,11 @@ void initThread(ServerUser* user, Device* device)
 			}
 		}
 	}
-	std::cout << "USERS ";
+	std::cout << "[server]~: connected users:\n";
 	for (std::vector<ServerUser*>::iterator it = users.begin(); it != users.end(); ++it)
 	{
-		std::cout << (*it)->getName() << " ";
+		std::cout << "\t" << (*it)->toString() << "\n";
 	}
-	std::cout << "\n";
 	delete device->active.channel;
 	delete device->passive.channel;
 	delete device;
@@ -86,9 +84,9 @@ int main(int argc, char* argv[])
 		std::string userName;
 
 		ServerComm* activeComm = server.newConnection();
-		std::cout << "ACTIVE SERVER <-> " << activeComm->receiveMessage() << " CLIENT\n";
+		activeComm->receiveMessage();
 		ServerComm* passiveComm = server.newConnection();
-		std::cout << "PASSIVE SERVER <-> " << passiveComm->receiveMessage() << " CLIENT\n";
+		passiveComm->receiveMessage();
 
 		userName = passiveComm->receiveMessage();
 		std::cout << "[server]~: user " << userName << " logged in.\n";

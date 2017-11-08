@@ -1,5 +1,6 @@
 #include "activeprocess.hpp"
 #include "filediff.hpp"
+#include "file.hpp"
 #include <unistd.h>
 
 #include <iostream>
@@ -42,7 +43,6 @@ void ActiveProcess::synchronize(void)
 		this->downloadFile(this->folder->getPath(), (*it).getName());
 	}
 
-	std::cout << diff.toString() << "\n";
 }
 
 void ActiveProcess::merge(void)
@@ -50,7 +50,7 @@ void ActiveProcess::merge(void)
 	std::vector<File> remoteFiles = this->channel->pull();
 
 	FileDiff diff = this->folder->diff(remoteFiles);
-	std::cout << diff.toString() << "\n";
+
 	std::vector<File> create = diff.getCreatedFiles();
 	std::vector<File> modified = diff.getModifiedFiles();
 	std::vector<File> deleted = diff.getDeletedFiles();
@@ -79,7 +79,16 @@ void ActiveProcess::uploadFile(std::string path, std::string fileName)
 void ActiveProcess::downloadFile(std::string path, std::string fileName)
 {
 	this->channel->sendMessage(fileName);
-	this->channel->receiveFile(path + fileName);
+	if(this->channel->receiveMessage() == "OK")
+		this->channel->receiveFile(path + fileName);
+	else
+		std::cout << "File not exists.\n";
+}
+
+void ActiveProcess::list(void)
+{
+	std::vector<File> remoteFiles = this->channel->pull();
+	std::cout << File::toString(remoteFiles);
 }
 
 void ActiveProcess::sendActionResquest(Action action)

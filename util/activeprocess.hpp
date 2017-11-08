@@ -22,6 +22,7 @@ class ActiveProcess
 		void deleteFile(std::string fileName);
 		void uploadFile(std::string path, std::string fileName);
 		void downloadFile(std::string path, std::string fileName);
+		void list(void);
 
 		void sendActionResquest(Action action);
 };

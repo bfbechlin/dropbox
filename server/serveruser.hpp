@@ -13,7 +13,7 @@ class ServerUser
 
 	public:
 		FolderManager* folder;
-		
+
 		ServerUser(void){};
 		ServerUser(std::string name, FolderManager* folder);
 		ServerUser(std::string name, FolderManager* folder, Device* device);
@@ -27,5 +27,7 @@ class ServerUser
 		void processResquest(Device* device);
 		void executeAction(Device* device);
 		void notifyOthers(Device* device);
+
+		std::string toString(void);
 };
 #endif

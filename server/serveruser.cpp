@@ -1,5 +1,5 @@
 #include "serveruser.hpp"
-
+#include <sstream>
 #include <iostream>
 
 ServerUser::ServerUser(std::string name, FolderManager* folder)
@@ -50,8 +50,8 @@ void ServerUser::processResquest(Device* device)
 {
 	/* Blockable call */
 	int actionType = device->nextActionResquest();
-	Action test(actionType);
-	std::cout << "PROCESSING " << test.getTypeName() << "\n";
+	Action nextAction(actionType);
+	std::cout << "["<< this->name << "@device" << static_cast<void*>(device) << "]~: Processing::" << nextAction.getTypeName() << "\n";
 
 	device->processAction(actionType);
 
@@ -68,7 +68,7 @@ void ServerUser::executeAction(Device* device)
 	}
 	Action nextAction = device->popAction();
 	int actionType = nextAction.getType();
-	std::cout << "EXECUTING " << nextAction.getTypeName() << "\n";
+	std::cout << "["<< this->name << "@device" << static_cast<void*>(device) << "]~: Executing::" << nextAction.getTypeName() << "\n";
 
 	device->executeAction(nextAction);
 
@@ -79,13 +79,21 @@ void ServerUser::executeAction(Device* device)
 
 void ServerUser::notifyOthers(Device* device)
 {
-	std::cout << "NOTIFY ";
 	for (std::vector<Device*>::iterator it = this->devices.begin(); it != this->devices.end(); ++it)
 	{
-		std::cout << static_cast<void*>((*it)) << " ";
 		if((*it) != device){
 			(*it)->pushAction(Action(ACTION_NOTIFY));
 		}
 	}
-	std::cout << "\n";
+}
+
+std::string ServerUser::toString(void)
+{
+	std::stringstream devs;
+	for (std::vector<Device*>::iterator it = this->devices.begin(); it != this->devices.end(); ++it)
+	{
+		devs << "device" << static_cast<void*>((*it)) << " ";
+	}
+
+	return std::string(this->name ": " + devs.str());
 }

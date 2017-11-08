@@ -15,7 +15,8 @@
 #define ACTION_DELETE  		4
 #define ACTION_DOWNLOAD 	5
 #define ACTION_UPLOAD  		6
-#define ACTION_EXIT  		7
+#define ACTION_LIST  		7
+#define ACTION_EXIT  		8
 
 class Action{
 	private:

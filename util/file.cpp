@@ -1,4 +1,6 @@
 #include "file.hpp"
+#include "action.hpp"
+#include <libgen.h>
 #include <sys/stat.h>
 
 File::File(){
@@ -52,6 +54,28 @@ std::string File::toString() const
 		"\nModify: " + this->modification.toDate());
 }
 
+std::map<std::string, std::string> File::parsePath(std::string pathName)
+{
+	char* bkp1 = (char*)pathName.c_str();
+	char* bkp2 = (char*)pathName.c_str();
+
+	std::map<std::string, std::string> data;
+
+	data[ARG_FILENAME] = std::string(basename(bkp1));
+	data[ARG_PATHNAME] = std::string(dirname(bkp2)) + "/";
+
+	return data;
+}
+
+std::string File::toString(std::vector<File> files)
+{
+	std::string filesString = "";
+	for (std::vector<File>::iterator it = files.begin(); it != files.end(); ++it)
+	{
+		filesString += (*it).toString() + "\n";
+	}
+	return filesString;
+}
 
 bool File::isTemp(std::string path)
 {

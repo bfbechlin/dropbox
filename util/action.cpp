@@ -53,6 +53,8 @@ std::string Action::getTypeName(void)
 			return std::string("Download");
 		case ACTION_UPLOAD:
 			return std::string("Upload");
+		case ACTION_LIST:
+			return std::string("List");
 		case ACTION_EXIT:
 			return std::string("Exit");
 		default:

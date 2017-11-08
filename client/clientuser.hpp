@@ -15,6 +15,8 @@ class ClientUser
 		Device* device;
 		ClientUser(void){};
 		ClientUser(std::string name, FolderManager* folder, Device* device);
+
+		std::string getName(void);
 		void processResquest(void);
 		void executeAction(void);
 };
