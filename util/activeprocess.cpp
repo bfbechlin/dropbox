@@ -21,7 +21,7 @@ void ActiveProcess::synchronize(void)
 	std::vector<File> remoteFiles = this->channel->pull();
 
 	FileDiff diff = this->folder->diff(remoteFiles);
-	std::cout << diff.toString() << "\n";
+
 	std::vector<File> create = diff.getCreatedFiles();
 	std::vector<File> modified = diff.getModifiedFiles();
 	std::vector<File> deleted = diff.getDeletedFiles();
@@ -41,6 +41,8 @@ void ActiveProcess::synchronize(void)
 	{
 		this->downloadFile(this->folder->getPath(), (*it).getName());
 	}
+
+	std::cout << diff.toString() << "\n";
 }
 
 void ActiveProcess::merge(void)

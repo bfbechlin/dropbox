@@ -37,11 +37,11 @@ void ServerUser::processResquest(Device* device)
 	Action test(actionType);
 	std::cout << "PROCESSING " << test.getTypeName() << "\n";
 
+	device->processAction(actionType);
+
 	/* Actions that modificate files */
 	if(actionType == ACTION_UPLOAD || actionType == ACTION_DELETE)
 		this->notifyOthers(device);
-
-	device->processAction(actionType);
 }
 
 void ServerUser::executeAction(Device* device)
@@ -52,11 +52,11 @@ void ServerUser::executeAction(Device* device)
 	int actionType = nextAction.getType();
 	std::cout << "EXECUTING " << nextAction.getTypeName() << "\n";
 
+	device->executeAction(nextAction);
+
 	/* Actions that modificate files */
 	if(actionType == ACTION_SYNCHRONIZE || actionType == ACTION_DOWNLOAD)
 		this->notifyOthers(device);
-
-	device->executeAction(nextAction);
 }
 
 void ServerUser::notifyOthers(Device* device)

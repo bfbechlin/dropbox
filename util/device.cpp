@@ -18,6 +18,9 @@ void Device::executeAction(Action action)
 		case ACTION_INITILIAZE:
 			this->active.merge();
 			break;
+		case ACTION_MERGE:
+			this->active.merge();
+			break;
 		case ACTION_SYNCHRONIZE:
 			this->active.synchronize();
 			break;
@@ -44,7 +47,10 @@ void Device::processAction(int actionType){
 	{
 		case ACTION_INITILIAZE:
 			this->passive.merge();
-			this->pushAction(Action(ACTION_SYNCHRONIZE, args));
+			this->pushAction(Action(ACTION_MERGE, args));
+			break;
+		case ACTION_MERGE:
+			this->passive.merge();
 			break;
 		case ACTION_SYNCHRONIZE:
 			this->passive.synchronize();
