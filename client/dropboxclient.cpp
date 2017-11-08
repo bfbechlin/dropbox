@@ -119,7 +119,7 @@ void ioThread(Device* device)
 				if(argument != ""){
 					folder = new FolderManager(argument);
 					if(!File::isDir(argument)){
-						std::cout << "\tDirectory" << argument <<" not exists and cannot be created .\n";
+						std::cout << "\tDirectory " << argument <<" not exists and cannot be created .\n";
 						delete folder;
 					} else {
 						user->setFolder(folder);
@@ -127,7 +127,7 @@ void ioThread(Device* device)
 						device->pushAction(Action(ACTION_INITILIAZE));
 					}
 				} else {
-					std::string path = "/sync_dir_" + user->getName();
+					std::string path = "./sync_dir_" + user->getName();
 					folder = new FolderManager(path);
 					if(!File::isDir(path)){
 						std::cout << "\tDirectory" << path <<" not exists and cannot be created .\n";
