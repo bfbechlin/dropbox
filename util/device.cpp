@@ -16,7 +16,7 @@ void Device::executeAction(Action action)
 	switch (actionType)
 	{
 		case ACTION_INITILIAZE:
-			this->active.synchronize();
+			this->active.merge();
 			break;
 		case ACTION_SYNCHRONIZE:
 			this->active.synchronize();
@@ -43,7 +43,7 @@ void Device::processAction(int actionType){
 	switch (actionType)
 	{
 		case ACTION_INITILIAZE:
-			this->passive.synchronize();
+			this->passive.merge();
 			this->pushAction(Action(ACTION_SYNCHRONIZE, args));
 			break;
 		case ACTION_SYNCHRONIZE:

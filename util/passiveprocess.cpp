@@ -26,6 +26,16 @@ void PassiveProcess::synchronize(void)
 	}
 }
 
+void PassiveProcess::merge(void)
+{
+	std::vector<File> files = this->folder->getFiles();
+	this->channel->push(files);
+	int downloads = std::stoi(this->channel->receiveMessage());
+	for(int i = 0; i < downloads; i++) {
+		this->downloadFile();
+	}
+}
+
 void PassiveProcess::deleteFile(void)
 {
 	std::string fileName = this->channel->receiveMessage();

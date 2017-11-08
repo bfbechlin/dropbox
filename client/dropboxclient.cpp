@@ -6,26 +6,29 @@
 #include <iostream>
 #include <iterator>
 #include <thread>
+#include <chrono>
 
-#include <unistd.h>
 void activeThread(ClientUser* user)
 {
-	user->device->active.channel->sendMessage(std::string("TESTING FROM ACTIVE THREAD CLIENT\n"));
- 	usleep(1000000);
-	/*
 	while(1)
 		user->executeAction();
-	*/
 }
 
 void passiveThread(ClientUser* user)
 {
-	std::cout << user->device->passive.channel->receiveMessage();
- 	usleep(1100000);
-	/*
 	while(1)
 		user->processResquest();
-	*/
+}
+
+void notifyThread(ClientUser* user, FolderManager* folder)
+{
+	while(1){
+		if(folder->isModified()){
+			std::cout << "MODIFIED"<< "\n";
+			user->device->pushAction(Action(ACTION_NOTIFY));
+		}
+		std::this_thread::sleep_for(std::chrono::seconds(1));
+	}
 }
 
 int main(int argc, char* argv[])
@@ -60,12 +63,14 @@ int main(int argc, char* argv[])
 		ActiveProcess(activeComm, thisFolder),
 		PassiveProcess(passiveComm, thisFolder)
 	);
+	thisDevice->pushAction(Action(ACTION_INITILIAZE));
 	user = ClientUser(userName, thisFolder, thisDevice);
-
 	std::thread act(activeThread, &user);
 	std::thread pass(passiveThread, &user);
+	std::thread noti(notifyThread, &user, thisFolder);
 	act.join();
 	pass.join();
+	noti.join();
 
 	delete thisDevice;
 	delete thisFolder;

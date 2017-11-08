@@ -21,6 +21,7 @@ void ActiveProcess::synchronize(void)
 	std::vector<File> remoteFiles = this->channel->pull();
 
 	FileDiff diff = this->folder->diff(remoteFiles);
+	std::cout << diff.toString() << "\n";
 	std::vector<File> create = diff.getCreatedFiles();
 	std::vector<File> modified = diff.getModifiedFiles();
 	std::vector<File> deleted = diff.getDeletedFiles();
@@ -31,6 +32,26 @@ void ActiveProcess::synchronize(void)
 		std::string path = this->folder->getPath() + (*it).getName();
 		unlink(path.c_str());
 	}
+
+	std::vector<File> downloads = modified;
+	/* Merge two vectors */
+	downloads.insert(downloads.end(), create.begin(), create.end());
+	this->channel->sendMessage(std::to_string(downloads.size()));
+	for (std::vector<File>::iterator it = downloads.begin(); it != downloads.end(); ++it)
+	{
+		this->downloadFile(this->folder->getPath(), (*it).getName());
+	}
+}
+
+void ActiveProcess::merge(void)
+{
+	std::vector<File> remoteFiles = this->channel->pull();
+
+	FileDiff diff = this->folder->diff(remoteFiles);
+	std::cout << diff.toString() << "\n";
+	std::vector<File> create = diff.getCreatedFiles();
+	std::vector<File> modified = diff.getModifiedFiles();
+	std::vector<File> deleted = diff.getDeletedFiles();
 
 	std::vector<File> downloads = modified;
 	/* Merge two vectors */

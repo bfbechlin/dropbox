@@ -41,6 +41,8 @@ std::string Action::getTypeName(void)
 	switch (this->type) {
 		case ACTION_INITILIAZE:
 			return std::string("Initialize");
+		case ACTION_MERGE:
+			return std::string("Merge");
 		case ACTION_SYNCHRONIZE:
 			return std::string("Synchronize");
 		case ACTION_NOTIFY:

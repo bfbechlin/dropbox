@@ -9,11 +9,12 @@
 #define ARG_PATHNAME "pathName"
 
 #define ACTION_INITILIAZE 	0
-#define ACTION_SYNCHRONIZE	1
-#define ACTION_NOTIFY 		2
-#define ACTION_DELETE  		3
-#define ACTION_DOWNLOAD 	4
-#define ACTION_UPLOAD  		5
+#define ACTION_MERGE  		1
+#define ACTION_SYNCHRONIZE	2
+#define ACTION_NOTIFY 		3
+#define ACTION_DELETE  		4
+#define ACTION_DOWNLOAD 	5
+#define ACTION_UPLOAD  		6
 
 class Action{
 	private:

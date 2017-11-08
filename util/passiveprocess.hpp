@@ -19,6 +19,7 @@ class PassiveProcess
 		PassiveProcess(Communication* channel, FolderManager *folder);
 
 		void synchronize(void);
+		void merge(void);
 		void deleteFile(void);
 		void uploadFile(void);
 		void downloadFile(void);

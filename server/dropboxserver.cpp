@@ -9,14 +9,13 @@
 #include <vector>
 #include <thread>
 
-#include <unistd.h>
-int userLogedIndex(std::vector<ServerUser> users, std::string userName)
+int userLogedIndex(std::vector<ServerUser*> users, std::string userName)
 {
 	int i = -1;
-	for (std::vector<ServerUser>::iterator it = users.begin(); it != users.end(); ++it)
+	for (std::vector<ServerUser*>::iterator it = users.begin(); it != users.end(); ++it)
 	{
 		i++;
-		if((*it).getName() == userName)
+		if((*it)->getName() == userName)
 			return i;
 	}
 	return -1;
@@ -24,29 +23,20 @@ int userLogedIndex(std::vector<ServerUser> users, std::string userName)
 
 void activeThread(ServerUser* user, Device* device)
 {
-	device->active.channel->sendMessage(std::string("TESTING FROM ACTIVE THREAD SERVER\n"));
- 	usleep(1000000);
-	/*
 	while(1)
 		user->executeAction(device);
-	*/
 }
 
 void passiveThread(ServerUser* user, Device* device)
 {
-	std::cout << device->passive.channel->receiveMessage();
- 	usleep(1100000);
-
-	/*
 	while(1)
 		user->processResquest(device);
 
-	*/
 }
 
 int main(int argc, char* argv[])
 {
-	std::vector<ServerUser> users;
+	std::vector<ServerUser*> users;
 	if(argc != 3 && argc != 2)
 	{
 		std::cout << "Usage:\n\t ./dropboxServer <PORT> <DATABASE>\n\tDefault database: ./database\n";
@@ -74,28 +64,28 @@ int main(int argc, char* argv[])
 
 		userName = passiveComm->receiveMessage();
 		std::cout << "[server]~: user " << userName << " logged in.\n";
-		ServerUser thisUser;
+		ServerUser* thisUser;
 		int index;
 		if((index = userLogedIndex(users, userName)) == -1)
 		{
 			FolderManager* thisFolder = new FolderManager(std::string(
 				database->getPath() + "sync_dir_" + userName
 			));
-			thisUser = ServerUser(userName, thisFolder);
+			thisUser = new ServerUser(userName, thisFolder);
 			users.push_back(thisUser);
 		}
 		else
 		{
 			thisUser = users[index];
 		}
-		FolderManager* thisFolder = thisUser.getFolder();
+		FolderManager* thisFolder = thisUser->getFolder();
 		Device* thisDevice = new Device(
 			ActiveProcess(activeComm, thisFolder),
 			PassiveProcess(passiveComm, thisFolder)
 		);
-		thisUser.newDevice(thisDevice);
-		std::thread act(activeThread, &thisUser, thisDevice);
-		std::thread pass(passiveThread, &thisUser, thisDevice);
+		thisUser->newDevice(thisDevice);
+		std::thread act(activeThread, thisUser, thisDevice);
+		std::thread pass(passiveThread, thisUser, thisDevice);
 		act.detach();
 		pass.detach();
 	}

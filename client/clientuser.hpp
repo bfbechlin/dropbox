@@ -11,7 +11,6 @@ class ClientUser
 		std::string name;
 		FolderManager* folder;
 
-
 	public:
 		Device* device;
 		ClientUser(void){};

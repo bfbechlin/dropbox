@@ -42,38 +42,27 @@ std::vector<File> FileDiff::getModifiedFiles(void) {
 std::string FileDiff::toString() {
 
     std::vector<File>::iterator i;
-		std::string info(" ");
+		std::string info("[FileDiff]~:");
 
-    if(this->createdFiles.empty()) {
-        info += "\n\n[FileDiff]~: No new files.";
-    } else {
-        info += "\n\n[FileDiff]~: New files found ";
-        for(i = this->createdFiles.begin(); i != this->createdFiles.end(); i++) {
+	if(this->createdFiles.empty() && this->modifiedFiles.empty() && this->deletedFiles.empty()){
+		info += " no differences found.";
+	} else{
+		info += " differences found:";
+	}
+    for(i = this->createdFiles.begin(); i != this->createdFiles.end(); i++) {
 
-            info += "\n\t[+] " + (*i).getName();
-        }
+        info += "\n\t[+] " + (*i).getName();
     }
 
+    for(i = this->modifiedFiles.begin(); i != this->modifiedFiles.end(); i++) {
 
-    if(this->modifiedFiles.empty()) {
-        info += "\n\n[FileDiff]~: There are no recent modifications.";
-    } else {
-        info += "\n\n[FileDiff]~: New modifications found in the file(s) above";
-        for(i = this->modifiedFiles.begin(); i != this->modifiedFiles.end(); i++) {
-
-            info += "\n\t[M] " + (*i).getName();
-        }
+        info += "\n\t[M] " + (*i).getName();
     }
 
-    if(this->deletedFiles.empty()) {
-        info += "\n\n[FileDiff]~: There are no recent deletions.";
-    } else {
-        info += "\n\n[FileDiff]~: Recent deletions ";
-        for(i = this->deletedFiles.begin(); i != this->deletedFiles.end(); i++) {
+    for(i = this->deletedFiles.begin(); i != this->deletedFiles.end(); i++) {
 
-            info += "\n\t[-] " + (*i).getName();
-        }
+        info += "\n\t[-] " + (*i).getName();
     }
 
-		return info;
+	return info;
 }

@@ -18,6 +18,7 @@ class ActiveProcess
 		ActiveProcess(Communication* channel, FolderManager *folder);
 
 		void synchronize(void);
+		void merge(void);
 		void deleteFile(std::string fileName);
 		void uploadFile(std::string path, std::string fileName);
 		void downloadFile(std::string path, std::string fileName);
