@@ -18,12 +18,25 @@ ClientUser* user;
 
 void signalHandler( int signum ) {
 	user->device->pushAction(ACTION_EXIT);
-	std::this_thread::sleep_for(std::chrono::seconds(1));
+	std::this_thread::sleep_for(std::chrono::milliseconds(500));
+	std::cout << "\n.";
+	std::cout.flush();
+	std::this_thread::sleep_for(std::chrono::milliseconds(500));
+	std::cout << ".";
+	std::cout.flush();
+	std::this_thread::sleep_for(std::chrono::milliseconds(500));
+	std::cout << ".";
+	std::cout.flush();
+	std::this_thread::sleep_for(std::chrono::milliseconds(500));
+	std::cout << "GOOD BYE =D\n";
+	std::cout.flush();
 	exit(0);
 }
 
 void ioThread(Device* device)
 {
+	std::mutex block;
+	std::condition_variable response;
 	while(!device->isEndConnection())
 	{
 		std::string line;
@@ -56,7 +69,9 @@ void ioThread(Device* device)
 			}
 			if(File::exists(argument) && File::isValid(argument)){
 				std::map<std::string, std::string> args = File::parsePath(argument);
-				device->pushAction(Action(ACTION_UPLOAD, args));
+				std::unique_lock<std::mutex> lck(block);
+				device->pushAction(Action(ACTION_UPLOAD, args, &response));
+				response.wait(lck);
 			} else {
 				std::cout << "\t File "<< argument <<" not exists.\n";
 			}
@@ -68,10 +83,16 @@ void ioThread(Device* device)
 			}
 			args[ARG_FILENAME] = argument;
 			args[ARG_PATHNAME] = "./";
-			device->pushAction(Action(ACTION_DOWNLOAD, args));
+			std::unique_lock<std::mutex> lck(block);
+			device->pushAction(Action(ACTION_DOWNLOAD, args, &response));
+			response.wait(lck);
+			std::cout << device->getMessage();
 		}
 		else if(command == "list_server"){
-			device->pushAction(Action(ACTION_LIST));
+			std::unique_lock<std::mutex> lck(block);
+			device->pushAction(Action(ACTION_LIST, &response));
+			response.wait(lck);
+			std::cout << device->getMessage();
 		}
 		else if(command == "list_client"){
 			if(!user->isSynchronized()){

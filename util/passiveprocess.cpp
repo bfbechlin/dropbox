@@ -76,7 +76,7 @@ int PassiveProcess::parseActionResquest(void)
 {
 	std::string message = this->channel->receiveMessage();
 	if(message == std::string(""))
-		exit(0);
-
+		//exit(0);
+		return -1;
 	return std::stoi(message);
 }

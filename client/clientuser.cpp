@@ -17,11 +17,13 @@ std::string ClientUser::getName(void)
 
 bool ClientUser::isSynchronized(void)
 {
+	std::unique_lock<std::mutex> lck(this->syncAcess);
 	return this->synchronized;
 }
 
 void ClientUser::synchronize(void)
 {
+	std::unique_lock<std::mutex> lck(this->syncAcess);
 	this->synchronized = true;
 }
 

@@ -5,13 +5,22 @@ Device::Device(ActiveProcess active, PassiveProcess passive)
 	this->active = active;
 	this->passive = passive;
 	this->endConn = false;
+	this->buffer = "";
+}
+
+std::string Device::getMessage(void){
+	std::string buff = this->buffer;
+	this->buffer = "";
+	return buff;
 }
 
 bool Device::isEndConnection(void){
+	std::unique_lock<std::mutex> lck(this->endAcess);
 	return this->endConn;
 }
 
 void Device::endConnection(void){
+	std::unique_lock<std::mutex> lck(this->endAcess);
 	this->endConn = true;
 }
 
@@ -39,13 +48,13 @@ void Device::executeAction(Action action)
 			this->active.deleteFile(args[ARG_FILENAME]);
 			break;
 		case ACTION_DOWNLOAD:
-			this->active.downloadFile(args[ARG_PATHNAME], args[ARG_FILENAME]);
+			this->buffer = this->active.downloadFile(args[ARG_PATHNAME], args[ARG_FILENAME]);
 			break;
 		case ACTION_UPLOAD:
 			this->active.uploadFile(args[ARG_PATHNAME], args[ARG_FILENAME]);
 			break;
 		case ACTION_LIST:
-			this->active.list();
+			this->buffer = this->active.list();
 			break;
 		case ACTION_EXIT:
 			this->endConnection();
@@ -98,13 +107,13 @@ int Device::nextActionResquest(void)
 
 void Device::pushAction(Action newAction)
 {
-	// lock
+	std::unique_lock<std::mutex> lck(this->queueAcess);
 	this->actions.push(newAction);
 }
 
 Action Device::popAction(void)
 {
-	// lock
+	std::unique_lock<std::mutex> lck(this->queueAcess);
 	if(!this->actions.empty())
 	{
 		Action action = this->actions.front();
@@ -119,6 +128,6 @@ Action Device::popAction(void)
 
 bool Device::noAction(void)
 {
-	//lock
+	std::unique_lock<std::mutex> lck(this->queueAcess);
 	return this->actions.empty();
 }

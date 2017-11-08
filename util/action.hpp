@@ -28,6 +28,7 @@ class Action{
 		Action(void){};
 		Action(int type);
 		Action(int type, std::map<std::string, std::string> arguments);
+		Action(int type, std::condition_variable* signalVar);
 		Action(int type, std::map<std::string, std::string> arguments,
 			std::condition_variable* signalVar);
 

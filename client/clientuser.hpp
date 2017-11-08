@@ -1,6 +1,7 @@
 #ifndef __CLIENTUSER_HPP__
 #define __CLIENTUSER_HPP__
 
+#include <mutex>
 #include <string>
 #include "foldermanager.hpp"
 #include "device.hpp"
@@ -8,6 +9,7 @@
 class ClientUser
 {
 	private:
+		std::mutex syncAcess;
 		std::string name;
 		bool synchronized;
 

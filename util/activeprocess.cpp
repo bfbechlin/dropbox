@@ -81,19 +81,22 @@ void ActiveProcess::uploadFile(std::string path, std::string fileName)
 	this->channel->sendFile(path + fileName);
 }
 
-void ActiveProcess::downloadFile(std::string path, std::string fileName)
+std::string ActiveProcess::downloadFile(std::string path, std::string fileName)
 {
 	this->channel->sendMessage(fileName);
 	if(this->channel->receiveMessage() == "OK")
+	{
 		this->channel->receiveFile(path + fileName);
+		return std::string("Download of file " + fileName + " was successfull.\n");
+	}
 	else
-		std::cout << "File not exists.\n";
+		return std::string("Download error, file " + fileName + " doesn't exists in remote files.\n");
 }
 
-void ActiveProcess::list(void)
+std::string ActiveProcess::list(void)
 {
 	std::vector<File> remoteFiles = this->channel->pull();
-	std::cout << File::toString(remoteFiles);
+	return File::toString(remoteFiles);
 }
 
 void ActiveProcess::sendActionResquest(Action action)

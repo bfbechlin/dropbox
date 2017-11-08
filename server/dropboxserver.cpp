@@ -36,13 +36,14 @@ void initThread(ServerUser* user, Device* device)
 	pass.join();
 
 	user->removeDevice(device);
-	/* No user logged in this session */
+	/* No user logged in this session with this user */
 	if(user->noDevices())
 	{
 		for (std::vector<ServerUser*>::iterator it = users.begin(); it != users.end(); ++it)
 		{
 			if((*it) == user)
 			{
+				std::cout << "[server]~: user " << (*it)->getName() << " has logout.\n";
 				users.erase(it);
 				delete user->folder;
 				delete user;

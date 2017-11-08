@@ -2,6 +2,8 @@
 #define __DEVICE_HPP__
 
 #include <queue>
+#include <mutex>
+
 #include "action.hpp"
 #include "activeprocess.hpp"
 #include "passiveprocess.hpp"
@@ -10,14 +12,20 @@
 class Device
 {
 	private:
+		std::mutex queueAcess;
+		std::mutex endAcess;
 		std::queue<Action> actions;
 		bool endConn;
+		std::string buffer;
+
 	public:
 		ActiveProcess active;
 		PassiveProcess passive;
 
 		Device(void){};
 		Device(ActiveProcess active, PassiveProcess passive);
+
+		std::string getMessage(void);
 
 		void endConnection(void);
 		bool isEndConnection(void);
@@ -30,8 +38,6 @@ class Device
 		void pushAction(Action newAction);
 		Action popAction(void);
 		bool noAction(void);
-
-
 };
 
 #endif

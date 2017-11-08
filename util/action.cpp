@@ -15,6 +15,11 @@ Action::Action(int type, std::map<std::string, std::string> arguments)
 	this->signalVar = NULL;
 }
 
+Action::Action(int type, std::condition_variable* signalVar)
+{
+	this->type = type;
+	this->signalVar = signalVar;
+}
 
 Action::Action(int type, std::map<std::string, std::string> arguments,
 	std::condition_variable* signalVar)
