@@ -9,9 +9,7 @@
 class ServerUser
 {
 	private:
-		std::mutex lReader;
-		std::mutex lRW;
-		int readers;
+		std::mutex actionProcess;
 
 		std::string name;
 		std::vector<Device*> devices;

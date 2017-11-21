@@ -2,6 +2,7 @@
 #include "foldermanager.hpp"
 #include "servercomm.hpp"
 #include "serveruser.hpp"
+#include "loggedusers.hpp"
 #include "device.hpp"
 
 
@@ -10,7 +11,7 @@
 #include <vector>
 #include <thread>
 
-std::vector<ServerUser*> users;
+LoggedUsers users;
 
 void activeThread(ServerUser* user, Device* device)
 {
@@ -35,27 +36,13 @@ void initThread(ServerUser* user, Device* device)
 	act.join();
 	pass.join();
 
-	user->removeDevice(device);
-	/* No user logged in this session with this user */
-	if(user->noDevices())
-	{
-		for (std::vector<ServerUser*>::iterator it = users.begin(); it != users.end(); ++it)
-		{
-			if((*it) == user)
-			{
-				std::cout << "[server]~: user " << (*it)->getName() << " has logout.\n";
-				users.erase(it);
-				delete user->folder;
-				delete user;
-				break;
-			}
-		}
-	}
-	std::cout << "[server]~: connected users:\n";
-	for (std::vector<ServerUser*>::iterator it = users.begin(); it != users.end(); ++it)
-	{
-		std::cout << "\t" << (*it)->toString() << "\n";
-	}
+	users.removeDevice(user, device);
+	/* If no device logged in this session with this user, remove it */
+	std::string userName = user->getName();
+	if(users.tryRemoveUser(user))
+		std::cout << "[server]~: user " << userName << " has logout.\n";
+
+	std::cout << "[server]~: connected users:\n" << users.toString();
 	delete device->active.channel;
 	delete device->passive.channel;
 	delete device;
@@ -92,22 +79,15 @@ int main(int argc, char* argv[])
 		userName = passiveComm->receiveMessage();
 		std::cout << "[server]~: user " << userName << " logged in.\n";
 
-		ServerUser* thisUser;
-		bool found = false;
-		for (std::vector<ServerUser*>::iterator it = users.begin(); it != users.end(); ++it)
+		ServerUser* thisUser = users.getUserByName(userName);
+		std::cout << static_cast<void*>(thisUser) << "\n";
+		if(thisUser == NULL)
 		{
-			if((*it)->getName() == userName)
-			{
-				thisUser = (*it);
-				found = true;
-			}
-		}
-		if(!found){
 			FolderManager* thisFolder = new FolderManager(std::string(
 				database->getPath() + "sync_dir_" + userName
 			));
 			thisUser = new ServerUser(userName, thisFolder);
-			users.push_back(thisUser);
+			users.addUser(thisUser);
 		}
 		FolderManager* thisFolder = thisUser->getFolder();
 		Device* thisDevice = new Device(
