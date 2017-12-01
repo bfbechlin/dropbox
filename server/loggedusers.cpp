@@ -12,7 +12,6 @@ ServerUser* LoggedUsers::getUserByName(std::string userName)
 	std::unique_lock<std::mutex> lck(this->userAcess);
 	for (std::vector<ServerUser*>::iterator it = this->users.begin(); it != this->users.end(); ++it)
 	{
-		std::cout << (*it)->toString() << '\n';
 		if((*it)->getName() == userName)
 			return (*it);
 	}

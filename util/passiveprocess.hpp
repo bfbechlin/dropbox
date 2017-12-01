@@ -4,7 +4,7 @@
 #include <string>
 #include <vector>
 #include "action.hpp"
-#include "process.hpp"
+#include "actionqueue.hpp"
 #include "communication.hpp"
 #include "foldermanager.hpp"
 
@@ -12,6 +12,7 @@ class PassiveProcess
 {
 	private:
 		FolderManager* folder;
+
 	public:
 		Communication* channel;
 
@@ -19,11 +20,11 @@ class PassiveProcess
 		PassiveProcess(Communication* channel, FolderManager *folder);
 
 		void setFolder(FolderManager* folder);
-		
+
 		void synchronize(void);
 		void merge(void);
-		void deleteFile(void);
-		void uploadFile(void);
+		void deleteFile(ActionQueue* actions);
+		void uploadFile(ActionQueue* actions);
 		void downloadFile(void);
 		void list(void);
 

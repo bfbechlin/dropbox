@@ -1,7 +1,0 @@
-#include <condition_variable>
-#include <mutex>
-
-std::mutex lock;
-	std::condition_variable* end_connection;
-	std::unique_lock<std::mutex> l(lock);
-

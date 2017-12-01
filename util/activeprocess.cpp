@@ -22,8 +22,10 @@ void ActiveProcess::setFolder(FolderManager* folder)
 	this->folder = folder;
 }
 
-void ActiveProcess::synchronize(void)
+void ActiveProcess::synchronize(ActionQueue* actions)
 {
+	std::vector<Action> newActions;
+
 	std::vector<File> remoteFiles = this->channel->pull();
 
 	FileDiff diff = this->folder->diff(remoteFiles);
@@ -35,23 +37,32 @@ void ActiveProcess::synchronize(void)
 	/* Remove deleted files */
 	for (std::vector<File>::iterator it = deleted.begin(); it != deleted.end(); ++it)
 	{
-		std::string path = this->folder->getPath() + (*it).getName();
-		unlink(path.c_str());
+		std::map<std::string, std::string> args;
+		args[ARG_FILENAME] = (*it).getName();
+		newActions.push_back(Action(ACTION_SELF_DELETE, args));
 	}
 
 	std::vector<File> downloads = modified;
 	/* Merge two vectors */
 	downloads.insert(downloads.end(), create.begin(), create.end());
-	this->channel->sendMessage(std::to_string(downloads.size()));
 	for (std::vector<File>::iterator it = downloads.begin(); it != downloads.end(); ++it)
 	{
-		this->downloadFile(this->folder->getPath(), (*it).getName());
+		std::map<std::string, std::string> args;
+		args[ARG_FILENAME] = (*it).getName();
+		args[ARG_PATHNAME] = this->folder->getPath();
+		newActions.push_back(Action(ACTION_DOWNLOAD, args));
 	}
 
+	/* Verify with some modification will be made */
+	if ((create.size() + modified.size() + deleted.size()) != 0)
+		newActions.push_back(Action(ACTION_NOTIFY_OTHERS));
+
+	actions->pushFront(newActions);
 }
 
-void ActiveProcess::merge(void)
+void ActiveProcess::merge(ActionQueue* actions)
 {
+	std::vector<Action> newActions;
 	std::vector<File> remoteFiles = this->channel->pull();
 
 	FileDiff diff = this->folder->diff(remoteFiles);
@@ -63,45 +74,76 @@ void ActiveProcess::merge(void)
 	std::vector<File> downloads = modified;
 	/* Merge two vectors */
 	downloads.insert(downloads.end(), create.begin(), create.end());
-	this->channel->sendMessage(std::to_string(downloads.size()));
 	for (std::vector<File>::iterator it = downloads.begin(); it != downloads.end(); ++it)
 	{
-		this->downloadFile(this->folder->getPath(), (*it).getName());
+		std::map<std::string, std::string> args;
+		args[ARG_FILENAME] = (*it).getName();
+		args[ARG_PATHNAME] = this->folder->getPath();
+		newActions.push_back(Action(ACTION_DOWNLOAD, args));
 	}
+
+	/* Verify with some modification will be made */
+	if ((create.size() + modified.size() + deleted.size()) != 0)
+		newActions.push_back(Action(ACTION_NOTIFY_OTHERS));
+
+	actions->pushFront(newActions);
 }
 
-std::string ActiveProcess::deleteFile(std::string fileName)
+void ActiveProcess::deleteFile(std::string fileName)
 {
 	this->channel->sendMessage(fileName);
-	if(this->channel->receiveMessage() == "OK")
-		return std::string("File " + fileName + " was deleted successfull.\n");
+	std::string stats = this->channel->receiveMessage();
+	if(stats == "OK")
+		this->buffer = std::string("File " + fileName + " was deleted successfull.\n");
 
 	else
-		return std::string("Delete error, file " + fileName + " doesn't exists in remote files.\n");
+		this->buffer = std::string("Delete error, file " + fileName + " doesn't exists in remote files.\n");
+}
+
+void ActiveProcess::selfDeleteFile(std::string fileName)
+{
+	std::string pathName = this->folder->getPath() + fileName;
+	if(File::exists(pathName) && File::isValid(pathName))
+		unlink(pathName.c_str());
 }
 
 void ActiveProcess::uploadFile(std::string path, std::string fileName)
 {
 	this->channel->sendMessage(fileName);
 	this->channel->sendFile(path + fileName);
-}
-
-std::string ActiveProcess::downloadFile(std::string path, std::string fileName)
-{
-	this->channel->sendMessage(fileName);
-	if(this->channel->receiveMessage() == "OK")
+	std::string stats = this->channel->receiveMessage();
+	if(stats == "OK")
 	{
-		this->channel->receiveFile(path + fileName);
-		return std::string("Download of file " + fileName + " was successfull.\n");
+		this->buffer = std::string("Upload of file " + fileName + " was successfull.\n");
 	}
 	else
-		return std::string("Download error, file " + fileName + " doesn't exists in remote files.\n");
+		this->buffer = std::string("Upload error, file " + fileName + " doesn't uploaded to remote files.\n");
 }
 
-std::string ActiveProcess::list(void)
+void ActiveProcess::downloadFile(std::string path, std::string fileName)
+{
+	this->channel->sendMessage(fileName);
+	std::string stats = this->channel->receiveMessage();
+	if(stats == "OK")
+	{
+		this->channel->receiveFile(path + fileName);
+		this->buffer = std::string("Download of file " + fileName + " was successfull.\n");
+	}
+	else
+		this->buffer = std::string("Download error, file " + fileName + " doesn't exists in remote files.\n");
+}
+
+void ActiveProcess::list(void)
 {
 	std::vector<File> remoteFiles = this->channel->pull();
-	return File::toString(remoteFiles);
+	this->buffer = File::toString(remoteFiles);
+}
+
+std::string ActiveProcess::getInfo(void)
+{
+	std::string buff = this->buffer;
+	this->buffer = "";
+	return buff;
 }
 
 void ActiveProcess::sendActionResquest(Action action)

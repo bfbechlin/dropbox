@@ -17,7 +17,7 @@
 ClientUser* user;
 
 void signalHandler( int signum ) {
-	user->device->pushAction(ACTION_EXIT);
+	user->device->actions.pushBack(ACTION_EXIT);
 	std::this_thread::sleep_for(std::chrono::milliseconds(500));
 	std::cout << "\n.";
 	std::cout.flush();
@@ -70,8 +70,9 @@ void ioThread(Device* device)
 			if(File::exists(argument) && File::isValid(argument)){
 				std::map<std::string, std::string> args = File::parsePath(argument);
 				std::unique_lock<std::mutex> lck(block);
-				device->pushAction(Action(ACTION_UPLOAD, args, &response));
+				device->actions.pushBack(Action(ACTION_UPLOAD, args, &response));
 				response.wait(lck);
+				std::cout << device->getMessage();
 			} else {
 				std::cout << "\t File "<< argument <<" not exists.\n";
 			}
@@ -84,7 +85,7 @@ void ioThread(Device* device)
 			args[ARG_FILENAME] = argument;
 			args[ARG_PATHNAME] = "./";
 			std::unique_lock<std::mutex> lck(block);
-			device->pushAction(Action(ACTION_DOWNLOAD, args, &response));
+			device->actions.pushBack(Action(ACTION_DOWNLOAD, args, &response));
 			response.wait(lck);
 			std::cout << device->getMessage();
 		}
@@ -95,13 +96,13 @@ void ioThread(Device* device)
 			}
 			args[ARG_FILENAME] = argument;
 			std::unique_lock<std::mutex> lck(block);
-			device->pushAction(Action(ACTION_DELETE, args, &response));
+			device->actions.pushBack(Action(ACTION_DELETE, args, &response));
 			response.wait(lck);
 			std::cout << device->getMessage();
 		}
 		else if(command == "list_server"){
 			std::unique_lock<std::mutex> lck(block);
-			device->pushAction(Action(ACTION_LIST, &response));
+			device->actions.pushBack(Action(ACTION_LIST, &response));
 			response.wait(lck);
 			std::cout << device->getMessage();
 		}
@@ -124,7 +125,7 @@ void ioThread(Device* device)
 					} else {
 						user->setFolder(folder);
 						user->synchronize();
-						device->pushAction(Action(ACTION_INITILIAZE));
+						device->actions.pushBack(Action(ACTION_INITILIAZE));
 					}
 				} else {
 					std::string path = "./sync_dir_" + user->getName();
@@ -135,7 +136,7 @@ void ioThread(Device* device)
 					} else {
 						user->setFolder(folder);
 						user->synchronize();
-						device->pushAction(Action(ACTION_INITILIAZE));
+						device->actions.pushBack(Action(ACTION_INITILIAZE));
 					}
 				}
 			} else {
@@ -178,7 +179,7 @@ void notifyThread(Device* device, FolderManager* folder)
 	while(!device->isEndConnection()){
 		if(user->isSynchronized()){
 			if(user->folder->isModified()){
-				user->device->pushAction(Action(ACTION_NOTIFY));
+				user->device->actions.pushBack(Action(ACTION_NOTIFY));
 			}
 		}
 		std::this_thread::sleep_for(std::chrono::seconds(1));
@@ -193,6 +194,15 @@ int main(int argc, char* argv[])
 		std::cout << "Usage:\n\t ./dropboxServer <USERNAME> <ADRESS_SERVER> <PORT_SERVER> [SYNC_DIR]\n";
 		exit(1);
 	}
+	
+	FolderManager* thisFolder;
+	if(argc == 5){
+		thisFolder = new FolderManager(std::string(argv[4]));
+	}
+	else {
+		thisFolder = NULL;
+	}
+
 	std::string userName(argv[1]);
 	ClientComm* passiveComm = new ClientComm();
 	ClientComm* activeComm = new ClientComm();
@@ -204,14 +214,6 @@ int main(int argc, char* argv[])
 
 	activeComm->sendMessage(userName);
 
-	FolderManager* thisFolder;
-	if(argc == 5){
-		thisFolder = new FolderManager(std::string(argv[4]));
-	}
-	else {
-		thisFolder = NULL;
-	}
-
 	Device* thisDevice = new Device(
 		ActiveProcess(activeComm, thisFolder),
 		PassiveProcess(passiveComm, thisFolder)
@@ -220,7 +222,7 @@ int main(int argc, char* argv[])
 	user = new ClientUser(userName, thisFolder, thisDevice);
 	if(argc == 5) {
 		user->synchronize();
-		thisDevice->pushAction(Action(ACTION_INITILIAZE));
+		thisDevice->actions.pushBack(Action(ACTION_INITILIAZE));
 	}
 	std::thread io(ioThread, thisDevice);
 	std::thread act(activeThread, thisDevice);

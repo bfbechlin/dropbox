@@ -5,13 +5,11 @@ Device::Device(ActiveProcess active, PassiveProcess passive)
 	this->active = active;
 	this->passive = passive;
 	this->endConn = false;
-	this->buffer = "";
 }
 
-std::string Device::getMessage(void){
-	std::string buff = this->buffer;
-	this->buffer = "";
-	return buff;
+std::string Device::getMessage(void)
+{
+	return this->active.getInfo();
 }
 
 bool Device::isEndConnection(void){
@@ -34,27 +32,30 @@ void Device::executeAction(Action action)
 	switch (actionType)
 	{
 		case ACTION_INITILIAZE:
-			this->active.merge();
+			this->active.merge(&(this->actions));
 			break;
 		case ACTION_MERGE:
-			this->active.merge();
+			this->active.merge(&(this->actions));
 			break;
 		case ACTION_SYNCHRONIZE:
-			this->active.synchronize();
+			this->active.synchronize(&(this->actions));
 			break;
 		case ACTION_NOTIFY:
 			break;
 		case ACTION_DELETE:
-			this->buffer = this->active.deleteFile(args[ARG_FILENAME]);
+			this->active.deleteFile(args[ARG_FILENAME]);
+			break;
+		case ACTION_SELF_DELETE:
+			this->active.selfDeleteFile(args[ARG_FILENAME]);
 			break;
 		case ACTION_DOWNLOAD:
-			this->buffer = this->active.downloadFile(args[ARG_PATHNAME], args[ARG_FILENAME]);
+			this->active.downloadFile(args[ARG_PATHNAME], args[ARG_FILENAME]);
 			break;
 		case ACTION_UPLOAD:
 			this->active.uploadFile(args[ARG_PATHNAME], args[ARG_FILENAME]);
 			break;
 		case ACTION_LIST:
-			this->buffer = this->active.list();
+			this->active.list();
 			break;
 		case ACTION_EXIT:
 			this->endConnection();
@@ -64,14 +65,13 @@ void Device::executeAction(Action action)
 }
 
 void Device::processAction(int actionType){
-	std::map<std::string, std::string> args;
 
 	/* Only passive channel used*/
 	switch (actionType)
 	{
 		case ACTION_INITILIAZE:
 			this->passive.merge();
-			this->pushAction(Action(ACTION_MERGE, args));
+			this->actions.pushBack(Action(ACTION_MERGE));
 			break;
 		case ACTION_MERGE:
 			this->passive.merge();
@@ -80,16 +80,16 @@ void Device::processAction(int actionType){
 			this->passive.synchronize();
 			break;
 		case ACTION_NOTIFY:
-			this->pushAction(Action(ACTION_SYNCHRONIZE, args));
+			this->actions.pushBack(Action(ACTION_SYNCHRONIZE));
 			break;
 		case ACTION_DELETE:
-			this->passive.deleteFile();
+			this->passive.deleteFile(&(this->actions));
 			break;
 		case ACTION_DOWNLOAD:
 			this->passive.downloadFile();
 			break;
 		case ACTION_UPLOAD:
-			this->passive.uploadFile();
+			this->passive.uploadFile(&(this->actions));
 			break;
 		case ACTION_LIST:
 			this->passive.list();
@@ -103,31 +103,4 @@ void Device::processAction(int actionType){
 int Device::nextActionResquest(void)
 {
 	return this->passive.parseActionResquest();
-}
-
-void Device::pushAction(Action newAction)
-{
-	std::unique_lock<std::mutex> lck(this->queueAcess);
-	this->actions.push(newAction);
-}
-
-Action Device::popAction(void)
-{
-	std::unique_lock<std::mutex> lck(this->queueAcess);
-	if(!this->actions.empty())
-	{
-		Action action = this->actions.front();
-		this->actions.pop();
-		return action;
-	}
-	else
-	{
-		return Action();
-	}
-}
-
-bool Device::noAction(void)
-{
-	std::unique_lock<std::mutex> lck(this->queueAcess);
-	return this->actions.empty();
 }

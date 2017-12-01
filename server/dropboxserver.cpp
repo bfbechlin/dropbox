@@ -80,7 +80,6 @@ int main(int argc, char* argv[])
 		std::cout << "[server]~: user " << userName << " logged in.\n";
 
 		ServerUser* thisUser = users.getUserByName(userName);
-		std::cout << static_cast<void*>(thisUser) << "\n";
 		if(thisUser == NULL)
 		{
 			FolderManager* thisFolder = new FolderManager(std::string(

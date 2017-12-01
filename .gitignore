@@ -1,3 +1,7 @@
+database/*
+sync/*
+
+
 # Prerequisites
 *.d
 

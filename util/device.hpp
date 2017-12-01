@@ -5,6 +5,7 @@
 #include <mutex>
 
 #include "action.hpp"
+#include "actionqueue.hpp"
 #include "activeprocess.hpp"
 #include "passiveprocess.hpp"
 #include "foldermanager.hpp"
@@ -12,13 +13,11 @@
 class Device
 {
 	private:
-		std::mutex queueAcess;
 		std::mutex endAcess;
-		std::queue<Action> actions;
 		bool endConn;
-		std::string buffer;
-
+		
 	public:
+		ActionQueue actions;
 		ActiveProcess active;
 		PassiveProcess passive;
 
@@ -34,10 +33,6 @@ class Device
 		/* Receive request for a action resolve this request */
 		void processAction(int actionType);
 		int nextActionResquest(void);
-
-		void pushAction(Action newAction);
-		Action popAction(void);
-		bool noAction(void);
 };
 
 #endif

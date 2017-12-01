@@ -52,7 +52,7 @@ void ClientUser::processResquest(void)
 void ClientUser::executeAction(void)
 {
 	/* Busy Waiting for actions */
-	while(this->device->noAction());
-	Action nextAction = this->device->popAction();
+	while(this->device->actions.isEmpty());
+	Action nextAction = this->device->actions.pop();
 	this->device->executeAction(nextAction);
 }

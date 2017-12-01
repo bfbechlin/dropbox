@@ -8,15 +8,18 @@
 #define ARG_FILENAME "fileName"
 #define ARG_PATHNAME "pathName"
 
-#define ACTION_INITILIAZE 	0
-#define ACTION_MERGE  		1
-#define ACTION_SYNCHRONIZE	2
-#define ACTION_NOTIFY 		3
-#define ACTION_DELETE  		4
-#define ACTION_DOWNLOAD 	5
-#define ACTION_UPLOAD  		6
-#define ACTION_LIST  		7
-#define ACTION_EXIT  		8
+#define ACTION_INITILIAZE 		0
+#define ACTION_MERGE  			1
+#define ACTION_SYNCHRONIZE		2
+#define ACTION_NOTIFY 			3
+#define ACTION_NOTIFY_OTHERS 	4
+#define ACTION_NOTIFY_ALL 		5
+#define ACTION_DELETE  			6
+#define ACTION_SELF_DELETE 		7
+#define ACTION_DOWNLOAD 		8
+#define ACTION_UPLOAD  			9
+#define ACTION_LIST  			10
+#define ACTION_EXIT  			11
 
 class Action{
 	private:

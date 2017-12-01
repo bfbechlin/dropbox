@@ -52,8 +52,14 @@ std::string Action::getTypeName(void)
 			return std::string("Synchronize");
 		case ACTION_NOTIFY:
 			return std::string("Notify");
+		case ACTION_NOTIFY_ALL:
+			return std::string("NotifyAll");
+		case ACTION_NOTIFY_OTHERS:
+			return std::string("NotifyOthers");
 		case ACTION_DELETE:
 			return std::string("Delete");
+		case ACTION_SELF_DELETE:
+			return std::string("SelfDelete");
 		case ACTION_DOWNLOAD:
 			return std::string("Download");
 		case ACTION_UPLOAD:

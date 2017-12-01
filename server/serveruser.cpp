@@ -67,19 +67,20 @@ void ServerUser::processResquest(Device* device)
 void ServerUser::executeAction(Device* device)
 {
 	/* Busy Waiting for actions */
-	if(device->noAction()){
+	if(device->actions.isEmpty()){
 		return;
 	}
-	Action nextAction = device->popAction();
+	Action nextAction = device->actions.pop();
 	std::unique_lock<std::mutex> lck (this->actionProcess);
 	int actionType = nextAction.getType();
 	std::cout << "["<< this->name << "@device" << static_cast<void*>(device) << "]~: Executing::" << nextAction.getTypeName() << "\n";
 
 	device->executeAction(nextAction);
 
-	/* Actions that modificate files */
-	if(actionType == ACTION_SYNCHRONIZE)
+	if(actionType == ACTION_NOTIFY_OTHERS)
 		this->notifyOthers(device);
+	else if(actionType == ACTION_NOTIFY_ALL)
+		this->notifyAll();
 }
 
 void ServerUser::notifyOthers(Device* device)
@@ -87,7 +88,7 @@ void ServerUser::notifyOthers(Device* device)
 	for (std::vector<Device*>::iterator it = this->devices.begin(); it != this->devices.end(); ++it)
 	{
 		if((*it) != device){
-			(*it)->pushAction(Action(ACTION_NOTIFY));
+			(*it)->actions.pushBack(Action(ACTION_NOTIFY));
 		}
 	}
 }
@@ -95,7 +96,7 @@ void ServerUser::notifyOthers(Device* device)
 void ServerUser::notifyAll(void)
 {
 	for (std::vector<Device*>::iterator it = this->devices.begin(); it != this->devices.end(); ++it)
-		(*it)->pushAction(Action(ACTION_NOTIFY));
+		(*it)->actions.pushBack(Action(ACTION_NOTIFY));
 }
 
 std::string ServerUser::toString(void)
