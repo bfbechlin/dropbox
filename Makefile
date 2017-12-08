@@ -3,7 +3,7 @@ INCLUDE=-I./util
 FLAGS=-O2 -Wall -pthread -std=gnu++11 -Wl,--no-as-needed
 CFLAGS=$(FLAGS) $(INCLUDE)
 
-UTIL=util/timestamp.o util/file.o util/foldermanager.o util/filediff.o\
+UTIL=util/timestamp.o util/file.o util/foldermanager.o util/folderdiff.o\
  util/communication.o util/activeprocess.o util/passiveprocess.o util/device.o\
  util/action.o util/actionqueue.o
 

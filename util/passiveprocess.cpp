@@ -1,5 +1,5 @@
 #include "passiveprocess.hpp"
-#include "filediff.hpp"
+#include "folderdiff.hpp"
 #include <unistd.h>
 
 #include <iostream>

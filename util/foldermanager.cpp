@@ -130,7 +130,7 @@ std::vector<File> FolderManager::getAllFiles(void)
     return files;
 }
 
-FileDiff FolderManager::diff(std::vector<File> remoteFiles)
+FolderDiff FolderManager::diff(std::vector<File> remoteFiles)
 {
     std::vector<File>::iterator i;
     std::vector<File>::iterator j;
@@ -191,7 +191,7 @@ FileDiff FolderManager::diff(std::vector<File> remoteFiles)
         }
     }
 
-    return FileDiff(created, modified, deleted);
+    return FolderDiff(created, modified, deleted);
 }
 
 std::string FolderManager::toString() const {
