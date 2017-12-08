@@ -1,10 +1,10 @@
-#ifndef __FILEDIFF_H__
-#define __FILEDIFF_H__
+#ifndef __FOLDERDIFF_H__
+#define __FOLDERDIFF_H__
 
 #include "file.hpp"
 #include <vector>
 
-class FileDiff
+class FolderDiff
 {
 
 	private:
@@ -13,8 +13,8 @@ class FileDiff
 			std::vector<File> deletedFiles;
 
 	public:
-	    FileDiff(void){};
-			FileDiff(std::vector<File> createdFiles, std::vector<File> modifiedFiles,
+	    FolderDiff(void){};
+			FolderDiff(std::vector<File> createdFiles, std::vector<File> modifiedFiles,
 			std::vector<File> deletedFiles);
 
 			void createdFile(File file);

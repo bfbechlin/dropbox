@@ -15,7 +15,7 @@ class Device
 	private:
 		std::mutex endAcess;
 		bool endConn;
-		
+
 	public:
 		ActionQueue actions;
 		ActiveProcess active;
@@ -33,6 +33,9 @@ class Device
 		/* Receive request for a action resolve this request */
 		void processAction(int actionType);
 		int nextActionResquest(void);
+
+		void sendFileName(std::string fileName);
+		std::string receiveFileName();
 };
 
 #endif

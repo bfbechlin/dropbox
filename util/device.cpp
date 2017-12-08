@@ -28,36 +28,44 @@ void Device::executeAction(Action action)
 	int actionType = action.getType();
 
 	/* Only active channel used*/
-	this->active.sendActionResquest(action);
 	switch (actionType)
 	{
 		case ACTION_INITILIAZE:
+			this->active.sendActionResquest(action);
 			this->active.merge(&(this->actions));
 			break;
 		case ACTION_MERGE:
+			this->active.sendActionResquest(action);
 			this->active.merge(&(this->actions));
 			break;
 		case ACTION_SYNCHRONIZE:
+			this->active.sendActionResquest(action);
 			this->active.synchronize(&(this->actions));
 			break;
 		case ACTION_NOTIFY:
+			this->active.sendActionResquest(action);
 			break;
 		case ACTION_DELETE:
+			this->active.sendActionResquest(action);
 			this->active.deleteFile(args[ARG_FILENAME]);
 			break;
 		case ACTION_SELF_DELETE:
 			this->active.selfDeleteFile(args[ARG_FILENAME]);
 			break;
 		case ACTION_DOWNLOAD:
+			this->active.sendActionResquest(action);
 			this->active.downloadFile(args[ARG_PATHNAME], args[ARG_FILENAME]);
 			break;
 		case ACTION_UPLOAD:
+			this->active.sendActionResquest(action);
 			this->active.uploadFile(args[ARG_PATHNAME], args[ARG_FILENAME]);
 			break;
 		case ACTION_LIST:
+			this->active.sendActionResquest(action);
 			this->active.list();
 			break;
 		case ACTION_EXIT:
+			this->active.sendActionResquest(action);
 			this->endConnection();
 			break;
 	}
@@ -103,4 +111,12 @@ void Device::processAction(int actionType){
 int Device::nextActionResquest(void)
 {
 	return this->passive.parseActionResquest();
+}
+
+void Device::sendFileName(std::string fileName) {
+	this->passive.channel->sendMessage(fileName);
+}
+
+std::string Device::receiveFileName() {
+	return this->active.channel->receiveMessage();
 }

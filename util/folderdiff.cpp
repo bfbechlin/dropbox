@@ -1,48 +1,48 @@
 #include <iostream>
-#include "filediff.hpp"
+#include "folderdiff.hpp"
 
-FileDiff::FileDiff(std::vector<File> createdFiles, std::vector<File> modifiedFiles,
+FolderDiff::FolderDiff(std::vector<File> createdFiles, std::vector<File> modifiedFiles,
 	std::vector<File> deletedFiles)
 {
 	this->createdFiles = createdFiles;
 	this->modifiedFiles = modifiedFiles;
 	this->deletedFiles = deletedFiles;
 }
-void FileDiff::createdFile(File file)
+void FolderDiff::createdFile(File file)
 {
     this->createdFiles.push_back(file);
 }
 
-void FileDiff::modifiedFile(File file)
+void FolderDiff::modifiedFile(File file)
 {
     this->modifiedFiles.push_back(file);
 }
 
-void FileDiff::deletedFile(File file)
+void FolderDiff::deletedFile(File file)
 {
     this->deletedFiles.push_back(file);
 }
 
-std::vector<File> FileDiff::getCreatedFiles(void)
+std::vector<File> FolderDiff::getCreatedFiles(void)
 {
     return this->createdFiles;
 }
 
-std::vector<File> FileDiff::getDeletedFiles(void)
+std::vector<File> FolderDiff::getDeletedFiles(void)
 {
     return this->deletedFiles;
 }
 
-std::vector<File> FileDiff::getModifiedFiles(void) {
+std::vector<File> FolderDiff::getModifiedFiles(void) {
 
     return this->modifiedFiles;
 }
 
 
-std::string FileDiff::toString() {
+std::string FolderDiff::toString() {
 
     std::vector<File>::iterator i;
-		std::string info("[FileDiff]~:");
+		std::string info("[FolderDiff]~:");
 
 	if(this->createdFiles.empty() && this->modifiedFiles.empty() && this->deletedFiles.empty()){
 		info += " no differences found.";

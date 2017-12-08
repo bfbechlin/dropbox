@@ -6,7 +6,7 @@
 #include <sys/types.h>
 #include <dirent.h>
 #include "file.hpp"
-#include "filediff.hpp"
+#include "folderdiff.hpp"
 
 class FolderManager
 {
@@ -50,7 +50,7 @@ class FolderManager
 				is bigger in 'files'
 			DIFF_DELETED: files thar aren't in 'files' but are this folder.
 		*/
-		FileDiff diff(std::vector<File> files);
+		FolderDiff diff(std::vector<File> files);
 
 		std::string toString() const;
 };

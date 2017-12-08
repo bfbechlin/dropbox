@@ -3,7 +3,7 @@ INCLUDE=-I../util/ -I../server/ -I../client/ -I../config/
 FLAGS=-O2 -Wall
 CFLAGS=$(FLAGS) $(INCLUDE)
 
-UTIL=../util/timestamp.o ../util/file.o ../util/foldermanager.o ../util/filediff.o\
+UTIL=../util/timestamp.o ../util/file.o ../util/foldermanager.o ../util/folderdiff.o\
  ../util/communication.o ../util/activeprocess.o ../util/passiveprocess.o\
  ../util/action.o ../util/device.o
 

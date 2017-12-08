@@ -1,5 +1,5 @@
 #include "activeprocess.hpp"
-#include "filediff.hpp"
+#include "folderdiff.hpp"
 #include "file.hpp"
 #include <unistd.h>
 
@@ -28,7 +28,7 @@ void ActiveProcess::synchronize(ActionQueue* actions)
 
 	std::vector<File> remoteFiles = this->channel->pull();
 
-	FileDiff diff = this->folder->diff(remoteFiles);
+	FolderDiff diff = this->folder->diff(remoteFiles);
 
 	std::vector<File> create = diff.getCreatedFiles();
 	std::vector<File> modified = diff.getModifiedFiles();
@@ -65,11 +65,10 @@ void ActiveProcess::merge(ActionQueue* actions)
 	std::vector<Action> newActions;
 	std::vector<File> remoteFiles = this->channel->pull();
 
-	FileDiff diff = this->folder->diff(remoteFiles);
+	FolderDiff diff = this->folder->diff(remoteFiles);
 
 	std::vector<File> create = diff.getCreatedFiles();
 	std::vector<File> modified = diff.getModifiedFiles();
-	std::vector<File> deleted = diff.getDeletedFiles();
 
 	std::vector<File> downloads = modified;
 	/* Merge two vectors */
@@ -83,7 +82,7 @@ void ActiveProcess::merge(ActionQueue* actions)
 	}
 
 	/* Verify with some modification will be made */
-	if ((create.size() + modified.size() + deleted.size()) != 0)
+	if ((create.size() + modified.size()) != 0)
 		newActions.push_back(Action(ACTION_NOTIFY_OTHERS));
 
 	actions->pushFront(newActions);

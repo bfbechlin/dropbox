@@ -49,19 +49,34 @@ bool ServerUser::noDevices(void)
 void ServerUser::processResquest(Device* device)
 {
 	/* Blockable call */
+	std::string fileName = device->receiveFileName();
+	//std::cout << fileName << '\n';
 	int actionType = device->nextActionResquest();
-	//std::unique_lock<std::mutex> lck (this->actionProcess);
-	Action nextAction(actionType);
-	std::cout << "["<< this->name << "@device" << static_cast<void*>(device) << "]~: Processing::" << nextAction.getTypeName() << "\n";
 
+	Action nextAction(actionType);
+
+	switch (actionType) {
+		case ACTION_DELETE:
+		case ACTION_UPLOAD:
+			this->fileAcess.P(fileName, FILEACCESS_WRITE);
+			break;
+		case ACTION_DOWNLOAD:
+			this->fileAcess.P(fileName, FILEACCESS_READ);
+			break;
+	}
+
+	std::cout << "["<< this->name << "@device" << static_cast<void*>(device) << "]~: Processing::" << nextAction.getTypeName() << " " << fileName << "\n";
 	device->processAction(actionType);
 
-	/* Actions that modificate files */
-	if(actionType == ACTION_UPLOAD)
-		this->notifyOthers(device);
-
-	if(actionType == ACTION_DELETE)
-		this->notifyAll();
+	switch (actionType) {
+		case ACTION_DELETE:
+		case ACTION_UPLOAD:
+			this->fileAcess.V(fileName, FILEACCESS_WRITE);
+			break;
+		case ACTION_DOWNLOAD:
+			this->fileAcess.V(fileName, FILEACCESS_READ);
+			break;
+	}
 }
 
 void ServerUser::executeAction(Device* device)
@@ -73,14 +88,31 @@ void ServerUser::executeAction(Device* device)
 	Action nextAction = device->actions.pop();
 	std::unique_lock<std::mutex> lck (this->actionProcess);
 	int actionType = nextAction.getType();
-	std::cout << "["<< this->name << "@device" << static_cast<void*>(device) << "]~: Executing::" << nextAction.getTypeName() << "\n";
+	std::map<std::string, std::string> args = nextAction.getArguments();
 
+	switch (actionType) {
+		case ACTION_SELF_DELETE:
+		case ACTION_DOWNLOAD:
+			fileAcess.P(args[ARG_FILENAME], FILEACCESS_WRITE);
+			break;
+	}
+
+	std::cout << "["<< this->name << "@device" << static_cast<void*>(device) << "]~: Executing::" << nextAction.getTypeName() << "\n";
 	device->executeAction(nextAction);
 
-	if(actionType == ACTION_NOTIFY_OTHERS)
-		this->notifyOthers(device);
-	else if(actionType == ACTION_NOTIFY_ALL)
-		this->notifyAll();
+	switch (actionType) {
+		case ACTION_SELF_DELETE:
+		case ACTION_DOWNLOAD:
+			fileAcess.V(args[ARG_FILENAME], FILEACCESS_WRITE);
+			break;
+		case ACTION_NOTIFY_OTHERS:
+			this->notifyOthers(device);
+			break;
+		case ACTION_NOTIFY_ALL:
+			this->notifyAll();
+			break;
+	}
+
 }
 
 void ServerUser::notifyOthers(Device* device)

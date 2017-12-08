@@ -4,13 +4,14 @@
 #include <string>
 #include <mutex>
 #include "foldermanager.hpp"
+#include "filesmanager.hpp"
 #include "device.hpp"
 
 class ServerUser
 {
 	private:
 		std::mutex actionProcess;
-
+		FilesManager fileAcess;
 		std::string name;
 		std::vector<Device*> devices;
 
