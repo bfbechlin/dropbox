@@ -8,18 +8,17 @@
 #define ARG_FILENAME "fileName"
 #define ARG_PATHNAME "pathName"
 
-#define ACTION_INITILIAZE 		0
-#define ACTION_MERGE  			1
-#define ACTION_SYNCHRONIZE		2
-#define ACTION_NOTIFY 			3
-#define ACTION_NOTIFY_OTHERS 	4
-#define ACTION_NOTIFY_ALL 		5
-#define ACTION_DELETE  			6
-#define ACTION_SELF_DELETE 		7
-#define ACTION_DOWNLOAD 		8
-#define ACTION_UPLOAD  			9
-#define ACTION_LIST  			10
-#define ACTION_EXIT  			11
+#define ACTION_MERGE  			0
+#define ACTION_SYNCHRONIZE		1
+#define ACTION_NOTIFY 			2
+#define ACTION_NOTIFY_OTHERS 	3
+#define ACTION_NOTIFY_ALL 		4
+#define ACTION_DELETE  			5
+#define ACTION_SELF_DELETE 		6
+#define ACTION_DOWNLOAD 		7
+#define ACTION_UPLOAD  			8
+#define ACTION_LIST  			9
+#define ACTION_EXIT  			10
 
 class Action{
 	private:
@@ -30,6 +29,7 @@ class Action{
 	public:
 		Action(void){};
 		Action(int type);
+		Action(std::string encoded);
 		Action(int type, std::map<std::string, std::string> arguments);
 		Action(int type, std::condition_variable* signalVar);
 		Action(int type, std::map<std::string, std::string> arguments,
@@ -38,6 +38,7 @@ class Action{
 		int getType(void);
 		void signal();
 		std::string getTypeName(void);
+		std::string encode(void);
 		std::map<std::string, std::string> getArguments(void);
 };
 

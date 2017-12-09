@@ -17,19 +17,7 @@
 ClientUser* user;
 
 void signalHandler( int signum ) {
-	user->device->actions.pushBack(ACTION_EXIT);
-	std::this_thread::sleep_for(std::chrono::milliseconds(500));
-	std::cout << "\n.";
-	std::cout.flush();
-	std::this_thread::sleep_for(std::chrono::milliseconds(500));
-	std::cout << ".";
-	std::cout.flush();
-	std::this_thread::sleep_for(std::chrono::milliseconds(500));
-	std::cout << ".";
-	std::cout.flush();
-	std::this_thread::sleep_for(std::chrono::milliseconds(500));
-	std::cout << "GOOD BYE =D\n";
-	std::cout.flush();
+	user->device->executeAction(Action(ACTION_EXIT));
 	exit(0);
 }
 
@@ -125,7 +113,7 @@ void ioThread(Device* device)
 					} else {
 						user->setFolder(folder);
 						user->synchronize();
-						device->actions.pushBack(Action(ACTION_INITILIAZE));
+						device->actions.pushBack(Action(ACTION_MERGE));
 					}
 				} else {
 					std::string path = "./sync_dir_" + user->getName();
@@ -136,7 +124,7 @@ void ioThread(Device* device)
 					} else {
 						user->setFolder(folder);
 						user->synchronize();
-						device->actions.pushBack(Action(ACTION_INITILIAZE));
+						device->actions.pushBack(Action(ACTION_MERGE));
 					}
 				}
 			} else {
@@ -194,7 +182,7 @@ int main(int argc, char* argv[])
 		std::cout << "Usage:\n\t ./dropboxServer <USERNAME> <ADRESS_SERVER> <PORT_SERVER> [SYNC_DIR]\n";
 		exit(1);
 	}
-	
+
 	FolderManager* thisFolder;
 	if(argc == 5){
 		thisFolder = new FolderManager(std::string(argv[4]));
@@ -222,7 +210,7 @@ int main(int argc, char* argv[])
 	user = new ClientUser(userName, thisFolder, thisDevice);
 	if(argc == 5) {
 		user->synchronize();
-		thisDevice->actions.pushBack(Action(ACTION_INITILIAZE));
+		thisDevice->actions.pushBack(Action(ACTION_MERGE));
 	}
 	std::thread io(ioThread, thisDevice);
 	std::thread act(activeThread, thisDevice);

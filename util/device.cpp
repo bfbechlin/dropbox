@@ -30,10 +30,6 @@ void Device::executeAction(Action action)
 	/* Only active channel used*/
 	switch (actionType)
 	{
-		case ACTION_INITILIAZE:
-			this->active.sendActionResquest(action);
-			this->active.merge(&(this->actions));
-			break;
 		case ACTION_MERGE:
 			this->active.sendActionResquest(action);
 			this->active.merge(&(this->actions));
@@ -67,20 +63,19 @@ void Device::executeAction(Action action)
 		case ACTION_EXIT:
 			this->active.sendActionResquest(action);
 			this->endConnection();
+			this->active.exit();
 			break;
 	}
 	action.signal();
 }
 
-void Device::processAction(int actionType){
+void Device::processAction(Action action){
+
+	int actionType = action.getType();
 
 	/* Only passive channel used*/
 	switch (actionType)
 	{
-		case ACTION_INITILIAZE:
-			this->passive.merge();
-			this->actions.pushBack(Action(ACTION_MERGE));
-			break;
 		case ACTION_MERGE:
 			this->passive.merge();
 			break;
@@ -104,19 +99,12 @@ void Device::processAction(int actionType){
 			break;
 		case ACTION_EXIT:
 			this->endConnection();
+			this->passive.exit();
 			break;
 	}
 }
 
-int Device::nextActionResquest(void)
+Action Device::nextActionResquest(void)
 {
 	return this->passive.parseActionResquest();
-}
-
-void Device::sendFileName(std::string fileName) {
-	this->passive.channel->sendMessage(fileName);
-}
-
-std::string Device::receiveFileName() {
-	return this->active.channel->receiveMessage();
 }

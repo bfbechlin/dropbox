@@ -49,32 +49,32 @@ bool ServerUser::noDevices(void)
 void ServerUser::processResquest(Device* device)
 {
 	/* Blockable call */
-	std::string fileName = device->receiveFileName();
-	//std::cout << fileName << '\n';
-	int actionType = device->nextActionResquest();
-
-	Action nextAction(actionType);
+	Action nextAction = device->nextActionResquest();
+	int actionType = nextAction.getType();
+	std::map<std::string, std::string> args = nextAction.getArguments();
 
 	switch (actionType) {
 		case ACTION_DELETE:
 		case ACTION_UPLOAD:
-			this->fileAcess.P(fileName, FILEACCESS_WRITE);
+			this->fileAcess.P(args[ARG_FILENAME], FILEACCESS_WRITE);
 			break;
 		case ACTION_DOWNLOAD:
-			this->fileAcess.P(fileName, FILEACCESS_READ);
+			this->fileAcess.P(args[ARG_FILENAME], FILEACCESS_READ);
 			break;
 	}
 
-	std::cout << "["<< this->name << "@device" << static_cast<void*>(device) << "]~: Processing::" << nextAction.getTypeName() << " " << fileName << "\n";
+	std::map<std::string, std::string>::iterator it = args.find(ARG_FILENAME);
+	std::cout << "["<< this->name << "@device" << static_cast<void*>(device) << "]~: Processing :: " << nextAction.getTypeName()
+	<< " " <<  (it != args.end() ? args[ARG_FILENAME] : "") << "\n";
 	device->processAction(actionType);
 
 	switch (actionType) {
 		case ACTION_DELETE:
 		case ACTION_UPLOAD:
-			this->fileAcess.V(fileName, FILEACCESS_WRITE);
+			this->fileAcess.V(args[ARG_FILENAME], FILEACCESS_WRITE);
 			break;
 		case ACTION_DOWNLOAD:
-			this->fileAcess.V(fileName, FILEACCESS_READ);
+			this->fileAcess.V(args[ARG_FILENAME], FILEACCESS_READ);
 			break;
 	}
 }
@@ -97,7 +97,7 @@ void ServerUser::executeAction(Device* device)
 			break;
 	}
 
-	std::cout << "["<< this->name << "@device" << static_cast<void*>(device) << "]~: Executing::" << nextAction.getTypeName() << "\n";
+	std::cout << "["<< this->name << "@device" << static_cast<void*>(device) << "]~: Executing  :: " << nextAction.getTypeName() << "\n";
 	device->executeAction(nextAction);
 
 	switch (actionType) {
