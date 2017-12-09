@@ -2,6 +2,7 @@
 #define __CLIENTUSER_HPP__
 
 #include <mutex>
+#include <map>
 #include <string>
 #include "foldermanager.hpp"
 #include "device.hpp"

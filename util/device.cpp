@@ -28,51 +28,54 @@ void Device::executeAction(Action action)
 	int actionType = action.getType();
 
 	/* Only active channel used*/
-	this->active.sendActionResquest(action);
 	switch (actionType)
 	{
-		case ACTION_INITILIAZE:
-			this->active.merge(&(this->actions));
-			break;
 		case ACTION_MERGE:
+			this->active.sendActionResquest(action);
 			this->active.merge(&(this->actions));
 			break;
 		case ACTION_SYNCHRONIZE:
+			this->active.sendActionResquest(action);
 			this->active.synchronize(&(this->actions));
 			break;
 		case ACTION_NOTIFY:
+			this->active.sendActionResquest(action);
 			break;
 		case ACTION_DELETE:
+			this->active.sendActionResquest(action);
 			this->active.deleteFile(args[ARG_FILENAME]);
 			break;
 		case ACTION_SELF_DELETE:
 			this->active.selfDeleteFile(args[ARG_FILENAME]);
 			break;
 		case ACTION_DOWNLOAD:
+			this->active.sendActionResquest(action);
 			this->active.downloadFile(args[ARG_PATHNAME], args[ARG_FILENAME]);
 			break;
 		case ACTION_UPLOAD:
+			this->active.sendActionResquest(action);
 			this->active.uploadFile(args[ARG_PATHNAME], args[ARG_FILENAME]);
 			break;
 		case ACTION_LIST:
+			this->active.sendActionResquest(action);
 			this->active.list();
 			break;
 		case ACTION_EXIT:
+			this->active.sendActionResquest(action);
 			this->endConnection();
+			this->active.exit();
 			break;
 	}
 	action.signal();
 }
 
-void Device::processAction(int actionType){
+void Device::processAction(Action action){
+
+	int actionType = action.getType();
 
 	/* Only passive channel used*/
 	switch (actionType)
 	{
-		case ACTION_INITILIAZE:
-			this->passive.merge();
-			this->actions.pushBack(Action(ACTION_MERGE));
-			break;
 		case ACTION_MERGE:
 			this->passive.merge();
 			break;
@@ -96,11 +99,12 @@ void Device::processAction(int actionType){
 			break;
 		case ACTION_EXIT:
 			this->endConnection();
+			this->passive.exit();
 			break;
 	}
 }
 
-int Device::nextActionResquest(void)
+Action Device::nextActionResquest(void)
 {
 	return this->passive.parseActionResquest();
 }

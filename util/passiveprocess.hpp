@@ -27,8 +27,9 @@ class PassiveProcess
 		void uploadFile(ActionQueue* actions);
 		void downloadFile(void);
 		void list(void);
+		void exit(void);
 
-		int parseActionResquest(void);
+		Action parseActionResquest(void);
 };
 
 #endif

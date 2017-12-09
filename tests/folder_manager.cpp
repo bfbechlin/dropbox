@@ -1,5 +1,6 @@
 #include <iostream>
 #include "foldermanager.hpp"
+#include "action.hpp"
 
 /*
 * Test for get modification events at folderName
@@ -8,27 +9,13 @@
 int main(int argc, char* argv[])
 {
 
-	std::string path(argv[1]);
-	std::string buffer;
+	std::map<std::string, std::string> args;
+	args[ARG_FILENAME] = "test.txt";
+	args[ARG_PATHNAME] = "path";
 
-	FolderManager folder(path);
-
-	std::cout << folder.toString();
-
-	std::cout << "Verifing for modification at " << path << "\n";
-	std::cout << (folder.isModified() ? "True" : "False") << "\n";
-	std::cout << "write anything and enter to continue:\n";
-	std::cin >> buffer;
-
-	std::cout << "Verifing for modification at " << path << "\n";
-	std::cout << (folder.isModified() ? "True" : "False") << "\n";
-	std::cout << "write anything and enter to continue:\n";
-	std::cin >> buffer;
-
-	std::cout << "Verifing for modification at " << path << "\n";
-	std::cout << (folder.isModified() ? "True" : "False") << "\n";
-	std::cout << "write anything and enter to continue:\n";
-	std::cin >> buffer;
-
+	Action action1(ACTION_DOWNLOAD, args);
+	std::cout << action1.encode() << '\n';
+	Action action2(action1.encode());
+	std::cout << action2.encode() << '\n';
 	return 0;
 }

@@ -93,6 +93,7 @@ int main(int argc, char* argv[])
 			ActiveProcess(activeComm, thisFolder),
 			PassiveProcess(passiveComm, thisFolder)
 		);
+		thisDevice->actions.pushBack(ACTION_MERGE);
 		thisUser->newDevice(thisDevice);
 		std::thread init(initThread, thisUser, thisDevice);
 		init.detach();

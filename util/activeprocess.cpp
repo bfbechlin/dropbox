@@ -69,7 +69,6 @@ void ActiveProcess::merge(ActionQueue* actions)
 
 	std::vector<File> create = diff.getCreatedFiles();
 	std::vector<File> modified = diff.getModifiedFiles();
-	std::vector<File> deleted = diff.getDeletedFiles();
 
 	std::vector<File> downloads = modified;
 	/* Merge two vectors */
@@ -83,7 +82,7 @@ void ActiveProcess::merge(ActionQueue* actions)
 	}
 
 	/* Verify with some modification will be made */
-	if ((create.size() + modified.size() + deleted.size()) != 0)
+	if ((create.size() + modified.size()) != 0)
 		newActions.push_back(Action(ACTION_NOTIFY_OTHERS));
 
 	actions->pushFront(newActions);
@@ -139,6 +138,12 @@ void ActiveProcess::list(void)
 	this->buffer = File::toString(remoteFiles);
 }
 
+void ActiveProcess::exit(void)
+{
+	/* Only stay for any response */
+	this->channel->receiveMessage();
+}
+
 std::string ActiveProcess::getInfo(void)
 {
 	std::string buff = this->buffer;
@@ -148,5 +153,5 @@ std::string ActiveProcess::getInfo(void)
 
 void ActiveProcess::sendActionResquest(Action action)
 {
-	this->channel->sendMessage(std::to_string(action.getType()));
+	this->channel->sendMessage(action.encode());
 }

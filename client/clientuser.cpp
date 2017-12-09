@@ -44,8 +44,9 @@ void ClientUser::setFolder(FolderManager* folder)
 void ClientUser::processResquest(void)
 {
 	if(this->folder != NULL){
-		int actionType = this->device->nextActionResquest();
-		this->device->processAction(actionType);
+		Action nextAction = this->device->nextActionResquest();
+		//std::cout << "Procesing " << nextAction.getTypeName() << '\n';
+		this->device->processAction(nextAction);
 	}
 }
 
@@ -54,5 +55,7 @@ void ClientUser::executeAction(void)
 	/* Busy Waiting for actions */
 	while(this->device->actions.isEmpty());
 	Action nextAction = this->device->actions.pop();
+	//std::cout << "Executing " << nextAction.getTypeName() << '\n';
 	this->device->executeAction(nextAction);
+
 }
