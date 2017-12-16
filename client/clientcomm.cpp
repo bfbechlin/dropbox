@@ -64,9 +64,8 @@ bool ClientComm::connectServer(std::string serverIp, int serverPort)
 	if(connect(this->socketFd, (struct sockaddr*)&serverAddr, sizeof(serverAddr)) != 0)
 	{
 		fprintf(stderr, "[client]~: ERROR on open connection with server.\n");
-		exit(1);
+		return false;
 	}
 
-	fprintf(stderr, "[client]~: SUCCESS connect with %s\n",  inet_ntoa(serverAddr.sin_addr));
 	return true;
 }

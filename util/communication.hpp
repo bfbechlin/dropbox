@@ -5,6 +5,7 @@
 #include <vector>
 #include <string>
 
+#define COMM_ERROR "SeRveR CoMm ErRoR"
 #define COMM_FILE_CHUNK_SIZE 8192 //bytes
 #define COMM_MESSAGE_BEGIN 	'\x2'
 #define COMM_FILE_BEGIN 	'\x3'

@@ -25,15 +25,17 @@ class ServerUser
 		std::string getName(void);
 		FolderManager* getFolder(void);
 
-		void newDevice(Device* device);
+		int newDevice(Device* device);
 		void removeDevice(Device* device);
+		Device* getDevice(int index);
 		bool noDevices(void);
 
 		void processResquest(Device* device);
 		void executeAction(Device* device);
-		void notifyOthers(Device* device);
-		void notifyAll(void);
+		void pushActionOthers(Device* device, Action action);
+		void pushActionAll(Action action);
 
 		std::string toString(void);
 };
+
 #endif

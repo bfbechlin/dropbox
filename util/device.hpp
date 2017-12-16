@@ -10,14 +10,19 @@
 #include "passiveprocess.hpp"
 #include "foldermanager.hpp"
 
+#define STATE_RUNNING 0
+#define STATE_CLOSING 1
+#define STATE_RECONNECTING 2
+
 class Device
 {
 	private:
-		std::mutex endAcess;
-		bool endConn;
+		std::mutex stateAcess;
+		int state;
 
 	public:
 		ActionQueue actions;
+
 		ActiveProcess active;
 		PassiveProcess passive;
 
@@ -27,7 +32,8 @@ class Device
 		std::string getMessage(void);
 
 		void endConnection(void);
-		bool isEndConnection(void);
+		int getState(void);
+		void setState(int state);
 		/* Resquest for a action a blocks until it's resolved */
 		void executeAction(Action action);
 		/* Receive request for a action resolve this request */

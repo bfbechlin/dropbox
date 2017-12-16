@@ -17,6 +17,7 @@ class PassiveProcess
 		Communication* channel;
 
 		PassiveProcess(void);
+		PassiveProcess(FolderManager *folder);
 		PassiveProcess(Communication* channel, FolderManager *folder);
 
 		void setFolder(FolderManager* folder);

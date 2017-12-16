@@ -2,6 +2,7 @@
 #include <sstream>
 #include <iostream>
 
+std::mutex ioMutex;
 ServerUser::ServerUser(std::string name, FolderManager* folder)
 {
 	this->name = name;
@@ -25,9 +26,15 @@ FolderManager* ServerUser::getFolder(void)
 	return this->folder;
 }
 
-void ServerUser::newDevice(Device* device)
+int ServerUser::newDevice(Device* device)
 {
 	this->devices.push_back(device);
+	return (this->devices.size() - 1);
+}
+
+Device* ServerUser::getDevice(int index)
+{
+	return this->devices[index];
 }
 
 void ServerUser::removeDevice(Device* device)
@@ -52,6 +59,9 @@ void ServerUser::processResquest(Device* device)
 	Action nextAction = device->nextActionResquest();
 	int actionType = nextAction.getType();
 	std::map<std::string, std::string> args = nextAction.getArguments();
+	if(actionType == ACTION_INVALID){
+		device->setState(STATE_CLOSING);
+	}
 
 	switch (actionType) {
 		case ACTION_DELETE:
@@ -64,8 +74,11 @@ void ServerUser::processResquest(Device* device)
 	}
 
 	std::map<std::string, std::string>::iterator it = args.find(ARG_FILENAME);
-	std::cout << "["<< this->name << "@device" << static_cast<void*>(device) << "]~: Processing :: " << nextAction.getTypeName()
-	<< " " <<  (it != args.end() ? args[ARG_FILENAME] : "") << "\n";
+	{
+		std::unique_lock<std::mutex> lck(ioMutex);
+		std::cout << "["<< this->name << "@device" << static_cast<void*>(device) << "]~: Processing :: " << nextAction.getTypeName()
+		<< " " <<  (it != args.end() ? args[ARG_FILENAME] : "") << "\n";
+	}
 	device->processAction(actionType);
 
 	switch (actionType) {
@@ -97,8 +110,11 @@ void ServerUser::executeAction(Device* device)
 			break;
 	}
 
-	std::cout << "["<< this->name << "@device" << static_cast<void*>(device) << "]~: Executing  :: " << nextAction.getTypeName() << "\n";
-	device->executeAction(nextAction);
+	{
+		std::unique_lock<std::mutex> lck(ioMutex);
+		std::cout << "["<< this->name << "@device" << static_cast<void*>(device) << "]~: Executing  :: " << nextAction.getTypeName() << "\n";
+		device->executeAction(nextAction);
+	}
 
 	switch (actionType) {
 		case ACTION_SELF_DELETE:
@@ -106,29 +122,30 @@ void ServerUser::executeAction(Device* device)
 			fileAcess.V(args[ARG_FILENAME], FILEACCESS_WRITE);
 			break;
 		case ACTION_NOTIFY_OTHERS:
-			this->notifyOthers(device);
+			this->pushActionAll(Action(ACTION_NOTIFY));
 			break;
 		case ACTION_NOTIFY_ALL:
-			this->notifyAll();
+			this->pushActionAll(Action(ACTION_NOTIFY));
 			break;
 	}
 
+
 }
 
-void ServerUser::notifyOthers(Device* device)
+void ServerUser::pushActionOthers(Device* device, Action action)
 {
 	for (std::vector<Device*>::iterator it = this->devices.begin(); it != this->devices.end(); ++it)
 	{
 		if((*it) != device){
-			(*it)->actions.pushBack(Action(ACTION_NOTIFY));
+			(*it)->actions.pushBack(action);
 		}
 	}
 }
 
-void ServerUser::notifyAll(void)
+void ServerUser::pushActionAll(Action action)
 {
 	for (std::vector<Device*>::iterator it = this->devices.begin(); it != this->devices.end(); ++it)
-		(*it)->actions.pushBack(Action(ACTION_NOTIFY));
+		(*it)->actions.pushBack(action);
 }
 
 std::string ServerUser::toString(void)

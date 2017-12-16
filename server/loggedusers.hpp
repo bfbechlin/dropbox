@@ -3,6 +3,7 @@
 
 #include <string>
 #include <mutex>
+#include "action.hpp"
 #include "device.hpp"
 #include "serveruser.hpp"
 
@@ -21,6 +22,8 @@ class LoggedUsers
 		void removeDevice(ServerUser* user, Device* device);
 		bool tryRemoveUser(ServerUser* user);
 
+		void pushActionAll(Action action);
+		std::vector<std::string> getUserNames(void);
 		std::string toString(void);
 };
 #endif

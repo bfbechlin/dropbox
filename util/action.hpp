@@ -7,7 +7,9 @@
 
 #define ARG_FILENAME "fileName"
 #define ARG_PATHNAME "pathName"
+#define ARG_SERVERS "servers"
 
+#define ACTION_INVALID  		-1
 #define ACTION_MERGE  			0
 #define ACTION_SYNCHRONIZE		1
 #define ACTION_NOTIFY 			2
@@ -19,6 +21,7 @@
 #define ACTION_UPLOAD  			8
 #define ACTION_LIST  			9
 #define ACTION_EXIT  			10
+#define ACTION_BACKUPSERVERS  	11
 
 class Action{
 	private:
@@ -27,7 +30,7 @@ class Action{
 		std::condition_variable* signalVar;
 
 	public:
-		Action(void){};
+		Action(void){this->type = -1;};
 		Action(int type);
 		Action(std::string encoded);
 		Action(int type, std::map<std::string, std::string> arguments);

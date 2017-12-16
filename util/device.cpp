@@ -4,7 +4,7 @@ Device::Device(ActiveProcess active, PassiveProcess passive)
 {
 	this->active = active;
 	this->passive = passive;
-	this->endConn = false;
+	this->state = STATE_RUNNING;
 }
 
 std::string Device::getMessage(void)
@@ -12,14 +12,19 @@ std::string Device::getMessage(void)
 	return this->active.getInfo();
 }
 
-bool Device::isEndConnection(void){
-	std::unique_lock<std::mutex> lck(this->endAcess);
-	return this->endConn;
+int Device::getState(void){
+	std::unique_lock<std::mutex> lck(this->stateAcess);
+	return this->state;
+}
+
+void Device::setState(int state){
+	std::unique_lock<std::mutex> lck(this->stateAcess);
+	this->state = state;
 }
 
 void Device::endConnection(void){
-	std::unique_lock<std::mutex> lck(this->endAcess);
-	this->endConn = true;
+	std::unique_lock<std::mutex> lck(this->stateAcess);
+	this->state = STATE_CLOSING;
 }
 
 void Device::executeAction(Action action)
@@ -64,6 +69,9 @@ void Device::executeAction(Action action)
 			this->active.sendActionResquest(action);
 			this->endConnection();
 			this->active.exit();
+			break;
+		case ACTION_BACKUPSERVERS:
+			this->active.sendActionResquest(action);
 			break;
 	}
 	action.signal();

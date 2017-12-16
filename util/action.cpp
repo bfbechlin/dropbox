@@ -78,6 +78,8 @@ std::string Action::encode(void){
 std::string Action::getTypeName(void)
 {
 	switch (this->type) {
+		case ACTION_INVALID:
+			return std::string("Invalid");
 		case ACTION_MERGE:
 			return std::string("Merge");
 		case ACTION_SYNCHRONIZE:
@@ -100,6 +102,8 @@ std::string Action::getTypeName(void)
 			return std::string("List");
 		case ACTION_EXIT:
 			return std::string("Exit");
+		case ACTION_BACKUPSERVERS:
+			return std::string("UpdateBackupList");
 		default:
 			return std::string("");
 	}

@@ -5,6 +5,8 @@
 #include <map>
 #include <string>
 #include "foldermanager.hpp"
+#include "clientcomm.hpp"
+#include "serverlist.hpp"
 #include "device.hpp"
 
 class ClientUser
@@ -13,11 +15,12 @@ class ClientUser
 		std::mutex syncAcess;
 		std::string name;
 		bool synchronized;
+		ServerList backupServers;
 
 	public:
 		FolderManager* folder;
-
 		Device* device;
+
 		ClientUser(void){};
 		ClientUser(std::string name, FolderManager* folder, Device* device);
 
@@ -29,6 +32,8 @@ class ClientUser
 		void synchronize(void);
 		void processResquest(void);
 		void executeAction(void);
+
+		bool reconnect(void);
 };
 
 #endif

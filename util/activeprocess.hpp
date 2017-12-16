@@ -18,6 +18,7 @@ class ActiveProcess
 		Communication* channel;
 
 		ActiveProcess(void);
+		ActiveProcess(FolderManager *folder);
 		ActiveProcess(Communication* channel, FolderManager *folder);
 
 		void setFolder(FolderManager* folder);

@@ -11,6 +11,12 @@ ActiveProcess::ActiveProcess(void)
 	this->folder = NULL;
 }
 
+ActiveProcess::ActiveProcess(FolderManager *folder)
+{
+	this->channel = NULL;
+	this->folder = folder;
+}
+
 ActiveProcess::ActiveProcess(Communication* channel, FolderManager *folder)
 {
 	this->channel = channel;

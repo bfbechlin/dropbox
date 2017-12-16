@@ -44,6 +44,14 @@ bool LoggedUsers::tryRemoveUser(ServerUser* user)
 		return false;
 }
 
+void LoggedUsers::pushActionAll(Action action){
+	std::unique_lock<std::mutex> lck(this->userAcess);
+	for (std::vector<ServerUser*>::iterator it = this->users.begin(); it != this->users.end(); ++it)
+	{
+		(*it)->pushActionAll(action);
+	}
+}
+
 std::string LoggedUsers::toString(void)
 {
 	std::string buffer("");
@@ -53,4 +61,14 @@ std::string LoggedUsers::toString(void)
 		buffer += "\t" + (*it)->toString() + "\n";
 	}
 	return buffer;
+}
+
+std::vector<std::string> LoggedUsers::getUserNames(void)
+{
+	std::vector<std::string> names;
+	for (std::vector<ServerUser*>::iterator it = this->users.begin(); it != this->users.end(); ++it)
+	{
+		names.push_back((*it)->getName());
+	}
+	return names;
 }

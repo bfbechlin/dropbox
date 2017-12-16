@@ -65,10 +65,10 @@ std::string Communication::receiveMessage(void)
 	do
 	{
 		if(read(this->socketFd, &messageSignal, sizeof(messageSignal)) < (int)sizeof(messageSignal))
-			return std::string("");
+			return std::string(COMM_ERROR);
 	} while(messageSignal != COMM_MESSAGE_BEGIN);
 	if(read(this->socketFd, &messageLenght, sizeof(messageLenght)) < (int)sizeof(messageLenght))
-		return std::string("");
+		return std::string(COMM_ERROR);
 
 	messageLenght = ntohl(messageLenght);
 
@@ -78,7 +78,7 @@ std::string Communication::receiveMessage(void)
 	do
 	{
 		if((readBytes = read(this->socketFd, &buffer[messageLenght - remainingBytes], remainingBytes)) < 0)
-			return std::string("");
+			return std::string(COMM_ERROR);
 		remainingBytes -= readBytes;
 	} while(remainingBytes != 0);
 	return std::string(buffer);

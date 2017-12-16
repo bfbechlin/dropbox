@@ -10,6 +10,13 @@ PassiveProcess::PassiveProcess(void)
 	this->folder = NULL;
 }
 
+PassiveProcess::PassiveProcess(FolderManager *folder)
+{
+	this->channel = NULL;
+	this->folder = folder;
+}
+
+
 PassiveProcess::PassiveProcess(Communication* channel, FolderManager *folder)
 {
 	this->channel = channel;
@@ -83,8 +90,8 @@ void PassiveProcess::exit(void)
 Action PassiveProcess::parseActionResquest(void)
 {
 	std::string message = this->channel->receiveMessage();
-	if(message == std::string(""))
+	if(message == std::string(COMM_ERROR))
 		//exit(0);
-		return -1;
+		return Action();
 	return Action(message);
 }
