@@ -3,6 +3,7 @@
 #include "clientuser.hpp"
 #include "device.hpp"
 #include "file.hpp"
+#include "serverinfo.hpp"
 
 #include <iostream>
 #include <iterator>
@@ -17,8 +18,8 @@
 ClientUser* user;
 
 void signalHandler( int signum ) {
-	user->device->executeAction(Action(ACTION_EXIT));
 	user->device->setState(STATE_CLOSING);
+	user->device->executeAction(Action(ACTION_EXIT));
 	exit(0);
 }
 
@@ -133,6 +134,9 @@ void ioThread(Device* device)
 					std::cout << "\tAlready synchronized at'" << user->folder->getPath() << "'.\n";
 				}
 			}
+			else if(command == "connection_info"){
+				std::cout << user->connectionInfo();
+			}
 			else if(command == "exit"){
 				signalHandler(0);
 			}
@@ -231,6 +235,9 @@ int main(int argc, char* argv[])
 		user->synchronize();
 		thisDevice->actions.pushBack(Action(ACTION_MERGE));
 	}
+
+	user->setServer(ServerInfo(std::string(argv[2]), atoi(argv[3])));
+
 	std::thread io(ioThread, thisDevice);
 	std::thread act(activeThread, thisDevice);
 	std::thread pass(passiveThread, thisDevice);

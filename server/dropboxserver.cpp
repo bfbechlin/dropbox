@@ -70,7 +70,7 @@ void backupHealthCheck(ServerComm* comm, ServerInfo backup)
 	}
 	delete comm;
 	std::cout << "[server]~: backup server disconnect" << "\n";
-	std::cout << "[server]~: connected backups:" << backupServers.toString() << "\n";
+	std::cout << "[server]~: connected backups: " << backupServers.toString();
 }
 
 int main(int argc, char* argv[])
@@ -163,7 +163,7 @@ int main(int argc, char* argv[])
 			std::thread healthCheck(backupHealthCheck, newComm, backup);
 			healthCheck.detach();
 			std::cout << "[server]~: backup server connected" << "\n";
-			std::cout << "[server]~: connected backups:" << backupServers.toString() << "\n";
+			std::cout << "[server]~: connected backups: " << backupServers.toString();
 		}
 	}
 

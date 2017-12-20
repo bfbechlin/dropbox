@@ -50,5 +50,5 @@ std::string BackupServers::encode(void) {
 }
 
 std::string BackupServers::toString(void) {
-	return std::string(this->servers.toString() + "\tCHANNELS: " + std::to_string(this->channels.size()));
+	return std::string(std::to_string(this->channels.size()) + this->servers.toString());
 }

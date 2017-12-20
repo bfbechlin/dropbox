@@ -41,6 +41,10 @@ void ClientUser::setFolder(FolderManager* folder)
 	}
 }
 
+void ClientUser::setServer(ServerInfo server){
+	this->primaryServer = server;
+}
+
 void ClientUser::processResquest(void)
 {
 	if(this->folder != NULL){
@@ -93,10 +97,18 @@ bool ClientUser::reconnect(void)
 
 				this->device->passive.channel = passiveComm;
 				this->device->active.channel = activeComm;
+
+				this->primaryServer = server;
 				connected = true;
 			}
 		}
 	}
 	this->device->setState(STATE_RUNNING);
 	return true;
+}
+
+std::string ClientUser::connectionInfo(void)
+{
+	return std::string("Primary:\n\t" + this->primaryServer.toString()
+		+ "\nBackups:" + this->backupServers.toString());
 }

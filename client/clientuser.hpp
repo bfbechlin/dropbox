@@ -7,6 +7,7 @@
 #include "foldermanager.hpp"
 #include "clientcomm.hpp"
 #include "serverlist.hpp"
+#include "serverinfo.hpp"
 #include "device.hpp"
 
 class ClientUser
@@ -18,6 +19,7 @@ class ClientUser
 		ServerList backupServers;
 
 	public:
+		ServerInfo primaryServer;
 		FolderManager* folder;
 		Device* device;
 
@@ -26,6 +28,7 @@ class ClientUser
 
 		FolderManager* getFolder(void);
 		void setFolder(FolderManager* folder);
+		void setServer(ServerInfo server);
 
 		std::string getName(void);
 		bool isSynchronized(void);
@@ -34,6 +37,8 @@ class ClientUser
 		void executeAction(void);
 
 		bool reconnect(void);
+		std::string connectionInfo(void);
+
 };
 
 #endif
