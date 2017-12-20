@@ -86,7 +86,7 @@ bool ClientComm::connectServer(std::string serverIp, int serverPort)
 	}
 
 	printf( "[client]~: Connected with %s encryption.\n", SSL_get_cipher(this->ssl));
-	showCertificates(this->ssl);
+	//showCertificates(this->ssl);
 
 	return true;
 }

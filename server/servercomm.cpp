@@ -94,7 +94,6 @@ ServerComm* ServerComm::newConnection(void)
 	int clientSocket;
 	struct sockaddr_in clientAddr;
 	socklen_t clientAddrLen = sizeof(clientAddr);
-	//SSL* ssl;
 
 	if((clientSocket = accept(this->socketFd, (struct sockaddr *) &clientAddr, (socklen_t *) &clientAddrLen)) < 0)
 	{
@@ -105,19 +104,14 @@ ServerComm* ServerComm::newConnection(void)
 	fprintf(stderr, "[server]~: SUCCESS accepted connection with %s:%i\n", inet_ntoa(clientAddr.sin_addr), ntohs(clientAddr.sin_port));
 
 	this->ssl = SSL_new(this->ctx);
-		SSL_set_fd(this->ssl, clientSocket);
-		if(SSL_accept(this->ssl) == -1) {
-			ERR_print_errors_fp(stderr);
-			abort();
-		}
-		else {
-			printf("[server]~: SSL accepted.\n");
-			//showCertificates(this->ssl);
-		}
-		return new ServerComm(this->port, clientSocket, this->ssl, this->ctx);
+	SSL_set_fd(this->ssl, clientSocket);
+	if(SSL_accept(this->ssl) == -1) {
+		ERR_print_errors_fp(stderr);
+		abort();
+	}
+
+	return new ServerComm(this->port, clientSocket, this->ssl, this->ctx);
 }
-
-
 
 int ServerComm::isRoot(void) {
 	return getuid() == 0 ? 1 : 0;
