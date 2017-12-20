@@ -18,16 +18,24 @@
 #include <errno.h>
 #include <iostream>
 
+#include <openssl/ssl.h>
+#include <openssl/err.h>
+
+
 Communication::Communication(void)
 {
 	this->port = -1;
 	this->socketFd = -1;
+	this->ssl = NULL;
+	this->ctx = NULL;
 }
 
 Communication::Communication(int socketFd)
 {
 	this->port = -1;
 	this->socketFd = socketFd;
+	this->ssl = NULL;
+	this->ctx = NULL;
 }
 
 Communication::~Communication(void)
@@ -45,29 +53,32 @@ bool Communication::sendMessage(std::string message)
 	char messageBeginSignal = COMM_MESSAGE_BEGIN;
 	uint32_t messageLenght = strlen(message.c_str());
 	messageLenght = htonl(messageLenght);
-	if(write(this->socketFd, &messageBeginSignal, sizeof(messageBeginSignal)) < (int)sizeof(messageBeginSignal))
+
+	if(SSL_write(this->ssl, &messageBeginSignal, sizeof(messageBeginSignal)) < (int)sizeof(messageBeginSignal))
 		return false;
 
-	if(write(this->socketFd, &messageLenght, sizeof(messageLenght)) < (int)sizeof(messageLenght))
+	if(SSL_write(this->ssl, &messageLenght, sizeof(messageLenght)) < (int)sizeof(messageLenght))
 		return false;
 
-	if(write(this->socketFd, message.c_str(), strlen(message.c_str())) < (int)strlen(message.c_str()))
+	if(SSL_write(this->ssl, message.c_str(), strlen(message.c_str())) < (int)strlen(message.c_str()))
 		return false;
 
 	return true;
 }
+
 
 std::string Communication::receiveMessage(void)
 {
 	int readBytes, remainingBytes;
 	char messageSignal;
 	uint32_t messageLenght;
+
 	do
 	{
-		if(read(this->socketFd, &messageSignal, sizeof(messageSignal)) < (int)sizeof(messageSignal))
+		if(SSL_read(this->ssl, &messageSignal, sizeof(messageSignal)) < (int)sizeof(messageSignal))
 			return std::string(COMM_ERROR);
 	} while(messageSignal != COMM_MESSAGE_BEGIN);
-	if(read(this->socketFd, &messageLenght, sizeof(messageLenght)) < (int)sizeof(messageLenght))
+	if(SSL_read(this->ssl, &messageLenght, sizeof(messageLenght)) < (int)sizeof(messageLenght))
 		return std::string(COMM_ERROR);
 
 	messageLenght = ntohl(messageLenght);
@@ -77,18 +88,21 @@ std::string Communication::receiveMessage(void)
 	remainingBytes = messageLenght;
 	do
 	{
-		if((readBytes = read(this->socketFd, &buffer[messageLenght - remainingBytes], remainingBytes)) < 0)
+		if((readBytes = SSL_read(this->ssl, &buffer[messageLenght - remainingBytes], remainingBytes)) < 0)
 			return std::string(COMM_ERROR);
 		remainingBytes -= readBytes;
 	} while(remainingBytes != 0);
+
 	return std::string(buffer);
 }
+
 
 /*
 	http://en.cppreference.com/w/c/chrono/timespec
 	http://man7.org/linux/man-pages/man2/stat.2.html
 	http://man7.org/linux/man-pages/man2/utime.2.html
 */
+
 bool Communication::sendFile(std::string fileSourcePath)
 {
 	Timestamp modification, access;
@@ -112,24 +126,25 @@ bool Communication::sendFile(std::string fileSourcePath)
 	access = Timestamp(fileInfo.st_atim);
 	fileSize = fileInfo.st_size;
 	fileSize = htonl(fileSize);
-	if(write(this->socketFd, &fileBeginSignal, sizeof(fileBeginSignal)) < (int)sizeof(fileBeginSignal))
+
+	if(SSL_write(this->ssl, &fileBeginSignal, sizeof(fileBeginSignal)) < (int)sizeof(fileBeginSignal))
 	{
 		close(fd);
 		return false;
 	}
-	if(write(this->socketFd, &fileSize, sizeof(fileSize)) < (int)sizeof(fileSize))
+	if(SSL_write(this->ssl, &fileSize, sizeof(fileSize)) < (int)sizeof(fileSize))
 	{
 		close(fd);
 		return false;
 	}
 	timestampBuffer = access.encode();
-	if(write(this->socketFd, &timestampBuffer, TIMESTAMP_LEN) < (int)TIMESTAMP_LEN)
+	if(SSL_write(this->ssl, &timestampBuffer, TIMESTAMP_LEN) < (int)TIMESTAMP_LEN)
 	{
 		close(fd);
 		return false;
 	}
 	timestampBuffer = modification.encode();
-	if(write(this->socketFd, &timestampBuffer, TIMESTAMP_LEN) < (int)TIMESTAMP_LEN)
+	if(SSL_write(this->ssl, &timestampBuffer, TIMESTAMP_LEN) < (int)TIMESTAMP_LEN)
 	{
 		close(fd);
 		return false;
@@ -142,19 +157,23 @@ bool Communication::sendFile(std::string fileSourcePath)
 			close(fd);
 			return false;
 		}
-		if(write(this->socketFd, buffer, readBytes) < readBytes)
+		if(SSL_write(this->ssl, buffer, readBytes) < readBytes)
 		{
 			close(fd);
 			return false;
 		}
 		remainingBytes -= readBytes;
 	} while(remainingBytes > 0);
+
 	close(fd);
 	return true;
 }
 
+
+
 bool Communication::receiveFile(std::string fileDestPath)
 {
+
 	int fd;
 	char messageSignal;
 	char buffer[COMM_FILE_CHUNK_SIZE];
@@ -162,21 +181,24 @@ bool Communication::receiveFile(std::string fileDestPath)
 	Timestamp modification, access;
 	struct tsencode timestampBuffer;
 	struct timeval times[2];
-	int readBytes, remainingBytes, intendedBytes;
+	int readBytes = 0, remainingBytes, intendedBytes, writtenBytes;
+
 	do
 	{
-		if(read(this->socketFd, &messageSignal, sizeof(messageSignal)) < 0)
+
+		if(SSL_read(this->ssl, &messageSignal, sizeof(messageSignal)) < 0)
 			return false;
+
 	} while(messageSignal != COMM_FILE_BEGIN);
 
-	if(read(this->socketFd, &fileSize, sizeof(fileSize)) < 0)
+	if(SSL_read(this->ssl, &fileSize, sizeof(fileSize)) < 0)
 		return false;
 	fileSize = ntohl(fileSize);
-	if(read(this->socketFd, &timestampBuffer, TIMESTAMP_LEN) < (int)TIMESTAMP_LEN)
+	if(SSL_read(this->ssl, &timestampBuffer, TIMESTAMP_LEN) < (int)TIMESTAMP_LEN)
 		return false;
 	access = Timestamp(timestampBuffer);
 
-	if(read(this->socketFd, &timestampBuffer, TIMESTAMP_LEN) < (int)TIMESTAMP_LEN)
+	if(SSL_read(this->ssl, &timestampBuffer, TIMESTAMP_LEN) < (int)TIMESTAMP_LEN)
 		return false;
 	modification = Timestamp(timestampBuffer);
 
@@ -191,25 +213,35 @@ bool Communication::receiveFile(std::string fileDestPath)
 	{
 		intendedBytes = remainingBytes > COMM_FILE_CHUNK_SIZE ?
 			COMM_FILE_CHUNK_SIZE: remainingBytes;
-		if((readBytes = read(this->socketFd, buffer, intendedBytes)) < 0)
+
+		if(intendedBytes) readBytes = SSL_read(this->ssl, buffer, intendedBytes);
+
+		if(readBytes < 0)
+		{
+
+			close(fd);
+			return false;
+		}
+
+		if((writtenBytes = write(fd, buffer, readBytes)) < readBytes)
 		{
 			close(fd);
 			return false;
 		}
-		if(write(fd, buffer, readBytes) < readBytes)
-		{
-			close(fd);
-			return false;
-		}
+
 		remainingBytes -= readBytes;
 	} while(remainingBytes > 0);
+
 	close(fd);
 
 	times[TIMEVAL_ACCESS] = access.toTimeval();
 	times[TIMEVAL_MODIFICATION] = modification.toTimeval();
 	utimes(fileDestPath.c_str(), times);
+
 	return true;
 }
+
+
 
 bool Communication::push(std::vector<File> files)
 {
@@ -217,7 +249,7 @@ bool Communication::push(std::vector<File> files)
 	struct tsencode timestampBuffer;
 	char pushBeginSignal = COMM_PUSH_BEGIN;
 
-	if(write(this->socketFd, &pushBeginSignal, sizeof(pushBeginSignal)) < (int)sizeof(pushBeginSignal))
+	if(SSL_write(this->ssl, &pushBeginSignal, sizeof(pushBeginSignal)) < (int)sizeof(pushBeginSignal))
 		return false;
 
 	this->sendMessage(std::to_string(files.size()));
@@ -229,11 +261,11 @@ bool Communication::push(std::vector<File> files)
 		this->sendMessage((*it).getName());
 
 		timestampBuffer = access.encode();
-		if(write(this->socketFd, &timestampBuffer, TIMESTAMP_LEN) < (int)TIMESTAMP_LEN)
+		if(SSL_write(this->ssl, &timestampBuffer, TIMESTAMP_LEN) < (int)TIMESTAMP_LEN)
 			return false;
 
 		timestampBuffer = modification.encode();
-		if(write(this->socketFd, &timestampBuffer, TIMESTAMP_LEN) < (int)TIMESTAMP_LEN)
+		if(SSL_write(this->ssl, &timestampBuffer, TIMESTAMP_LEN) < (int)TIMESTAMP_LEN)
 			return false;
 
 	}
@@ -252,26 +284,28 @@ std::vector<File> Communication::pull(void)
 
 	do
 	{
-		if(read(this->socketFd, &messageSignal, sizeof(messageSignal)) < 0)
+		if(SSL_read(this->ssl, &messageSignal, sizeof(messageSignal)) < 0)
 			return files;
 	} while(messageSignal != COMM_PUSH_BEGIN);
+
 
 	lenght = std::stoi(this->receiveMessage());
 
 	for(i = 0; i < lenght; i++)
 	{
 		fileName = this->receiveMessage();
-		if(read(this->socketFd, &timestampBuffer, TIMESTAMP_LEN) < (int)TIMESTAMP_LEN)
+		if(SSL_read(this->ssl, &timestampBuffer, TIMESTAMP_LEN) < (int)TIMESTAMP_LEN)
 			break;
 
 		access = Timestamp(timestampBuffer);
 
-		if(read(this->socketFd, &timestampBuffer, TIMESTAMP_LEN) < (int)TIMESTAMP_LEN)
+		if(SSL_read(this->ssl, &timestampBuffer, TIMESTAMP_LEN) < (int)TIMESTAMP_LEN)
 			break;
 
 		modification = Timestamp(timestampBuffer);
 
 		files.push_back(File(fileName, access, modification));
 	}
+
 	return files;
 }

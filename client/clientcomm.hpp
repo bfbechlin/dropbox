@@ -3,9 +3,16 @@
 
 #include "../util/communication.hpp"
 #include <string>
+#include <openssl/ssl.h>
+#include <openssl/err.h>
 
 class ClientComm : public Communication
 {
+private:
+	void initSSL(void);
+	SSL_CTX* createContext(void);
+	void showCertificates(SSL* ssl);
+
 public:
 	ClientComm(void);
 	ClientComm(int port);
